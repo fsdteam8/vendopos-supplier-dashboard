@@ -11,9 +11,10 @@ export interface UserProfile {
   dateOfBirth?: string;
   image?: {
     url: string;
-    publicId: string;
+    public_id: string;
   };
   isVerified: boolean;
+  isSuspended: boolean;
   createdAt: string;
   updatedAt: string;
 }

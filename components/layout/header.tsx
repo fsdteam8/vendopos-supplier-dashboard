@@ -1,7 +1,10 @@
-"use client"
 import { Bell, Search } from "lucide-react"
+import { useProfile } from "@/app/features/profile/hooks/useProfile"
 
 export function Header() {
+  const { data: profile } = useProfile()
+  const userData = profile?.data
+
   return (
     <header className="h-16 bg-white border-b border-gray-200 px-8 flex items-center justify-between">
       <div className="flex items-center gap-4 flex-1">
@@ -30,15 +33,19 @@ export function Header() {
 
         <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
           <div className="text-right">
-            <p className="text-sm font-medium text-gray-900">John Doe</p>
-            <p className="text-xs text-gray-500">Administrator</p>
+            <p className="text-sm font-medium text-gray-900">{userData ? `${userData.firstName} ${userData.lastName}` : "User"}</p>
+            <p className="text-xs text-gray-500 capitalize">{userData?.role || "Member"}</p>
           </div>
           <div
-            className="w-10 h-10 rounded-full bg-[#1B7D6E] text-white flex items-center justify-center font-semibold text-sm"
+            className="w-10 h-10 rounded-full bg-[#1B7D6E] text-white flex items-center justify-center font-semibold text-sm overflow-hidden"
             role="img"
-            aria-label="User avatar with initials JD"
+            aria-label={`User avatar with name ${userData?.firstName}`}
           >
-            JD
+             {userData?.image?.url ? (
+                <img src={userData.image.url} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                userData?.firstName?.charAt(0) || "U"
+              )}
           </div>
         </div>
       </div>

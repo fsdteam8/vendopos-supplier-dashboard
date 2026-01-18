@@ -16,6 +16,7 @@ export function ProfileForm() {
     street: "",
     location: "",
     postalCode: "",
+    dateOfBirth: "",
   })
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -30,6 +31,7 @@ export function ProfileForm() {
         street: profile.data.street || "",
         location: profile.data.location || "",
         postalCode: profile.data.postalCode || "",
+        dateOfBirth: profile.data.dateOfBirth ? new Date(profile.data.dateOfBirth).toISOString().split('T')[0] : "",
       })
     }
   }, [profile])
@@ -61,10 +63,7 @@ export function ProfileForm() {
     data.append("street", formData.street)
     data.append("location", formData.location)
     data.append("postalCode", formData.postalCode)
-    // Date of Birth is technically required by the API prompt but not in UI; sending mock or empty if allowed, 
-    // but based on prompt "dateOfBirth" is a field. I will add it to the FormData if it were in the UI, 
-    // for now I'll omit or effectively send empty if not required by backend strictly, or add a hidden field if needed.
-    // The prompt showed it in the example payload. I will assume it's optional for now as it's not in the original design.
+    data.append("dateOfBirth", formData.dateOfBirth)
     
     if (selectedImage) {
       data.append("image", selectedImage)
@@ -94,8 +93,12 @@ export function ProfileForm() {
               role="img"
               aria-label="User avatar"
             >
-              {previewUrl ? (
-                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+              {previewUrl || profile?.data?.image?.url ? (
+                <img 
+                  src={previewUrl || profile?.data?.image?.url} 
+                  alt="Preview" 
+                  className="w-full h-full object-cover" 
+                />
               ) : (
                 profile?.data?.firstName?.charAt(0) || "U"
               )}
@@ -154,19 +157,35 @@ export function ProfileForm() {
             </div>
           </div>
 
-          <div>
-            <label htmlFor="email" className="text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
-              <Mail className="w-4 h-4" aria-hidden="true" />
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              value={formData.email}
-              disabled
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-sm cursor-not-allowed"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="email" className="text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                <Mail className="w-4 h-4" aria-hidden="true" />
+                Email Address
+              </label>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                value={formData.email}
+                disabled
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-sm cursor-not-allowed"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="dateOfBirth" className="text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                Date of Birth
+              </label>
+              <input
+                id="dateOfBirth"
+                type="date"
+                name="dateOfBirth"
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B7D6E] text-sm"
+              />
+            </div>
           </div>
 
           <div>
