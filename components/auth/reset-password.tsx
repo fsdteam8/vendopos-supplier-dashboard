@@ -18,8 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { authService } from "@/lib/api/auth-service";
 import Image from "next/image";
+import { authService } from "@/lib/api/api";
 
 // ✅ Validation schema
 const resetPasswordSchema = z

@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import Image from "next/image";
-import { useForgotPassword } from "@/lib/hooks/useAuth";
+import { useForgotPassword } from "@/hooks/useAuth";
 
 // ✅ Validation schema
 const forgotSchema = z.object({

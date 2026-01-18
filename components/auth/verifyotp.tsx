@@ -9,8 +9,8 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { useVerifyOtp } from "@/lib/hooks/useAuth";
-import { VerifyOtp, VerifyOtpInput } from "@/lib/types/auth";
+import { useVerifyOtp } from "@/hooks/useAuth";
+import { VerifyOtp } from "@/types/auth";
 
 export default function VerifyOTP() {
   const [email, setEmail] = useState<string | null>(null);

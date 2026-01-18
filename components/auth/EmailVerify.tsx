@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
 import Image from "next/image";
-import { useEmailVerify } from "@/lib/hooks/useAuth";
+import { useEmailVerify } from "@/hooks/useAuth";
 
 const formSchema = z.object({
   otp: z.string().min(6, {
