@@ -5,9 +5,11 @@ import { AddProductModal } from "@/components/ui/add-product-modal"
 import { ProductTable } from "@/components/ui/product-table"
 import { Plus } from "lucide-react"
 import { useProducts } from "@/app/features/products/hooks/useProducts"
+import { Product } from "@/app/features/products/types"
 
 export default function Products() {
   const [showAddModal, setShowAddModal] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const { data, isLoading, isError, refetch } = useProducts()
 
   return (
@@ -18,7 +20,10 @@ export default function Products() {
           <p className="text-gray-600 mt-1">Manage and add new products to your inventory</p>
         </div>
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={() => {
+            setEditingProduct(null)
+            setShowAddModal(true)
+          }}
           className="flex items-center gap-2 px-6 py-3 bg-[#1B7D6E] text-white rounded-lg hover:bg-[#155D5C] transition-colors font-medium text-sm"
           aria-label="Add new product"
         >
@@ -33,13 +38,24 @@ export default function Products() {
           products={data?.data || []} 
           isLoading={isLoading} 
           isError={isError}
+          onEdit={(product) => {
+            setEditingProduct(product)
+            setShowAddModal(true)
+          }}
         />
       </div>
 
       {showAddModal && (
         <AddProductModal 
-          onClose={() => setShowAddModal(false)} 
-          onSuccess={() => refetch()}
+          onClose={() => {
+            setShowAddModal(false)
+            setEditingProduct(null)
+          }} 
+          onSuccess={() => {
+             refetch()
+             setEditingProduct(null) 
+          }}
+          product={editingProduct}
         />
       )}
     </div>

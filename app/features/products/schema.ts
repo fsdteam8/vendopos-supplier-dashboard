@@ -23,8 +23,7 @@ export const createProductSchema = z.object({
   isKosher: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
   variants: z.array(variantSchema).min(1, "At least one variant is required"),
-  images: z.any() // We'll validate this manually or refine it for FileList
-    .refine((files) => files?.length > 0, "At least one image is required"),
+  images: z.any().optional(), // Relaxed validation for edit mode where images might not be changed
 });
 
 export type CreateProductFormValues = z.infer<typeof createProductSchema>;

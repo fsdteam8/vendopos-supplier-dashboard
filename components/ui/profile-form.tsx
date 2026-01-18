@@ -1,17 +1,32 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Camera, Mail, Phone, MapPin } from "lucide-react"
+import { useProfile } from "@/app/features/profile/hooks/useProfile"
 
 export function ProfileForm() {
+  const { data: profile } = useProfile()
   const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "+1 234 567 8900",
-    address: "123 Main St, New York, NY 10001",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
   })
+
+  useEffect(() => {
+    if (profile?.data) {
+      setFormData({
+        firstName: profile.data.firstName || "",
+        lastName: profile.data.lastName || "",
+        email: profile.data.email || "",
+        phone: "", // API doesn't seem to return phone/address yet based on types, keeping empty or preserving if it was there
+        address: "",
+      })
+    }
+  }, [profile])
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -35,11 +50,11 @@ export function ProfileForm() {
         <div className="mb-8">
           <div className="flex items-start gap-4">
             <div
-              className="w-24 h-24 rounded-full bg-[#1B7D6E] text-white flex items-center justify-center text-3xl font-bold flex-shrink-0"
+              className="w-24 h-24 rounded-full bg-[#1B7D6E] text-white flex items-center justify-center text-3xl font-bold flex-shrink-0 uppercase"
               role="img"
               aria-label="User avatar"
             >
-              J
+              {profile?.data?.firstName?.charAt(0) || "U"}
             </div>
             <div>
               <h4 className="text-sm font-semibold text-gray-900 mb-2">Change Avatar</h4>

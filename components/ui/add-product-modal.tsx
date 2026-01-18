@@ -5,19 +5,23 @@ import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { X, Upload, Plus, Trash2, Loader2 } from "lucide-react"
 import { createProductSchema, CreateProductFormValues } from "@/app/features/products/schema"
-import { createProduct } from "@/app/features/products/api"
+import { createProduct, updateProduct } from "@/app/features/products/api"
 import { useCategories } from "@/app/features/categories/hooks/useCategories"
 import { toast } from "sonner"
+import { Product } from "@/app/features/products/types"
 
 interface AddProductModalProps {
   onClose: () => void
   onSuccess?: () => void
+  product?: Product | null
 }
 
-export function AddProductModal({ onClose, onSuccess }: AddProductModalProps) {
+export function AddProductModal({ onClose, onSuccess, product }: AddProductModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [imageFiles, setImageFiles] = useState<File[]>([])
-  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>(
+    product?.images?.map(img => img.url) || []
+  )
 
   // Fetch categories
   const { data: categoriesData, isLoading: isLoadingCategories } = useCategories()
@@ -29,6 +33,7 @@ export function AddProductModal({ onClose, onSuccess }: AddProductModalProps) {
     setValue,
     watch,
     formState: { errors },
+    reset,
   } = useForm<CreateProductFormValues>({
     resolver: zodResolver(createProductSchema),
     defaultValues: {
@@ -48,6 +53,34 @@ export function AddProductModal({ onClose, onSuccess }: AddProductModalProps) {
       shelfLife: "",
     },
   })
+
+  // Initialize form with product data if available
+  useEffect(() => {
+    if (product) {
+       reset({
+          title: product.title || "",
+          productName: product.productName || "",
+          description: product.description || "",
+          shortDescription: product.shortDescription || "",
+          categoryId: typeof product.categoryId === 'object' ? (product.categoryId as any)._id : product.categoryId || "", 
+          productType: product.productType || "",
+          originCountry: product.originCountry || "",
+          shelfLife: product.shelfLife || "",
+          isHalal: product.isHalal || false,
+          isOrganic: product.isOrganic || false,
+          isFrozen: product.isFrozen || false,
+          isKosher: product.isKosher || false,
+          isFeatured: product.isFeatured || false,
+          variants: product.variants?.map(v => ({
+             label: v.label,
+             price: v.price,
+             stock: v.stock,
+             unit: v.unit,
+             discount: v.discount || 0
+          })) || [{ label: "Default", price: 0, stock: 0, unit: "pcs", discount: 0 }],
+       })
+    }
+  }, [product, reset])
 
   // Watch category ID to filter/populate other fields
   const selectedCategoryId = watch("categoryId")
@@ -142,13 +175,18 @@ export function AddProductModal({ onClose, onSuccess }: AddProductModalProps) {
         formData.append("images", file)
       })
 
-      const response = await createProduct(formData)
+      let response;
+      if (product) {
+         response = await updateProduct(product._id, formData)
+      } else {
+         response = await createProduct(formData)
+      }
       if (response && (response.success || response.data)) {
-         toast.success("Product created successfully")
+         toast.success(product ? "Product updated successfully" : "Product created successfully")
          onClose()
          if (onSuccess) onSuccess()
       } else {
-         toast.error("Failed to create product")
+         toast.error(product ? "Failed to update product" : "Failed to create product")
       }
     } catch (error) {
       console.error("Submission error:", error)
@@ -163,8 +201,8 @@ export function AddProductModal({ onClose, onSuccess }: AddProductModalProps) {
       <div className="bg-white rounded-lg w-full max-w-4xl my-8 max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Add New Product</h2>
-            <p className="text-sm text-gray-600 mt-0.5">Fill in the details to create a new product.</p>
+            <h2 className="text-xl font-bold text-gray-900">{product ? "Edit Product" : "Add New Product"}</h2>
+            <p className="text-sm text-gray-600 mt-0.5">{product ? "Update product details." : "Fill in the details to create a new product."}</p>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
             <X className="w-5 h-5 text-gray-600" />

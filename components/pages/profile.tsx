@@ -3,17 +3,19 @@
 import { useState } from "react"
 import { ProfileForm } from "@/components/ui/profile-form"
 import { SecurityForm } from "@/components/ui/security-form"
+import { useProfile } from "@/app/features/profile/hooks/useProfile"
 
 type TabType = "profile" | "security"
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState<TabType>("profile")
+  const { data: profile } = useProfile()
 
   return (
     <div className="p-8 max-w-4xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
-        <p className="text-gray-600 mt-1">Welcome back, Admin</p>
+        <p className="text-gray-600 mt-1">Welcome back, {profile?.data?.firstName || "Admin"}</p>
       </div>
 
       {/* Tabs */}

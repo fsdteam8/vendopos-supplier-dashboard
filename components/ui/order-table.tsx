@@ -2,21 +2,26 @@
 
 import { useState, useMemo, useCallback, memo } from "react"
 import { Eye } from "lucide-react"
-import { mockOrders } from "@/lib/mock-data"
+import { Order } from "@/app/features/order/types"
+import { Skeleton } from "@/components/ui/skeleton"
+import { format } from "date-fns"
 
 interface OrderTableProps {
-  onSelectCustomer: (customer: (typeof mockOrders)[0]) => void
+  orders: Order[]
+  isLoading?: boolean
+  onSelectCustomer: (customer: Order) => void
 }
 
-const OrderTableComponent = ({ onSelectCustomer }: OrderTableProps) => {
+const OrderTableComponent = ({ orders = [], isLoading, onSelectCustomer }: OrderTableProps) => {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 3
 
   const { paginatedData, totalPages } = useMemo(() => {
-    const total = Math.ceil(mockOrders.length / itemsPerPage)
-    const data = mockOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+    if (!orders) return { paginatedData: [], totalPages: 0 }
+    const total = Math.ceil(orders.length / itemsPerPage)
+    const data = orders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
     return { paginatedData: data, totalPages: total }
-  }, [currentPage])
+  }, [currentPage, orders])
 
   const handlePrevPage = useCallback(() => {
     setCurrentPage((p) => Math.max(1, p - 1))
@@ -28,15 +33,15 @@ const OrderTableComponent = ({ onSelectCustomer }: OrderTableProps) => {
 
   const getStatusColor = useCallback((status: string) => {
     switch (status) {
-      case "Cancelled":
+      case "cancelled":
         return "text-red-600 bg-red-50"
-      case "Pending":
+      case "pending":
         return "text-yellow-600 bg-yellow-50"
-      case "Delivered":
+      case "delivered":
         return "text-green-600 bg-green-50"
-      case "Paid":
+      case "paid":
         return "text-green-600"
-      case "Unpaid":
+      case "unpaid":
         return "text-red-600"
       default:
         return "text-gray-600"
@@ -63,36 +68,60 @@ const OrderTableComponent = ({ onSelectCustomer }: OrderTableProps) => {
           </tr>
         </thead>
         <tbody>
-          {paginatedData.map((order) => (
+          {isLoading ? (
+             Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i} className="border-b border-gray-100">
+                   <td className="px-6 py-4"><Skeleton className="h-4 w-20" /></td>
+                   <td className="px-6 py-4"><Skeleton className="h-4 w-32" /></td>
+                   <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
+                   <td className="px-6 py-4"><Skeleton className="h-4 w-16" /></td>
+                   <td className="px-6 py-4"><Skeleton className="h-6 w-20 rounded-full" /></td>
+                   <td className="px-6 py-4"><Skeleton className="h-8 w-16" /></td>
+                </tr>
+             ))
+          ) : paginatedData.length === 0 ? (
+             <tr>
+                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                   No orders found.
+                </td>
+             </tr>
+          ) : (
+            paginatedData.map((order) => (
             <tr
-              key={`${order.id}-${order.billingDate}`}
+              key={order._id}
               className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
             >
-              <td className="px-6 py-4 text-sm text-gray-900 font-medium">{order.id}</td>
-              <td className="px-6 py-4 text-sm text-gray-900">{order.item}</td>
-              <td className="px-6 py-4 text-sm text-gray-900">{order.billingDate}</td>
-              <td className="px-6 py-4 text-sm text-gray-900 font-semibold">{order.amount}</td>
+              <td className="px-6 py-4 text-sm text-gray-900 font-medium">#{order._id.slice(-6).toUpperCase()}</td>
+              <td className="px-6 py-4 text-sm text-gray-900">
+                <div className="flex flex-col">
+                   <span className="font-medium">{order.items[0]?.product?.title || "Unknown Item"}</span>
+                   {order.items.length > 1 && <span className="text-xs text-gray-500">+{order.items.length - 1} more</span>}
+                </div>
+              </td>
+              <td className="px-6 py-4 text-sm text-gray-900">{format(new Date(order.purchaseDate), 'MMM dd, yyyy')}</td>
+              <td className="px-6 py-4 text-sm text-gray-900 font-semibold">${order.totalPrice}</td>
               <td className="px-6 py-4 text-sm">
                 <span
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.orderStatus || order.paymentStatus)}`}
                   role="status"
-                  aria-label={`Order status: ${order.status}`}
+                  aria-label={`Order status: ${order.orderStatus}`}
                 >
-                  {order.status}
+                  {order.orderStatus || order.paymentStatus}
                 </span>
               </td>
               <td className="px-6 py-4 text-sm">
                 <button
                   onClick={() => onSelectCustomer(order)}
                   className="flex items-center gap-2 text-[#1B7D6E] hover:text-[#155D5C] transition-colors font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#1B7D6E] focus:ring-offset-2 rounded"
-                  aria-label={`View details for order ${order.id}`}
+                  aria-label={`View details for order ${order._id}`}
                 >
                   <Eye className="w-4 h-4" aria-hidden="true" />
                   View
                 </button>
               </td>
             </tr>
-          ))}
+          ))
+          )}
         </tbody>
       </table>
 

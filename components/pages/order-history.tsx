@@ -1,20 +1,12 @@
-"use client"
-
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { OrderTable } from "@/components/ui/order-table"
 import { CustomerDetailsModal } from "@/components/ui/customer-details-modal"
-import { mockOrders } from "@/lib/mock-data"
+import { useOrders } from "@/app/features/order/hooks/useOrders"
+import { Order } from "@/app/features/order/types"
 
 export default function OrderHistory() {
-  const [selectedCustomer, setSelectedCustomer] = useState<(typeof mockOrders)[0] | null>(null)
-
-  const stats = useMemo(
-    () => ({
-      paid: mockOrders.filter((o) => o.status === "Paid").length,
-      unpaid: mockOrders.filter((o) => o.status === "Unpaid").length,
-    }),
-    [],
-  )
+  const [selectedCustomer, setSelectedCustomer] = useState<Order | null>(null)
+  const { data, isLoading } = useOrders()
 
   return (
     <div className="p-8">
@@ -23,18 +15,12 @@ export default function OrderHistory() {
         <p className="text-gray-600 mt-1">Manage your personal information and profile details.</p>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-4 mb-6">
-        <button className="px-4 py-2 rounded-lg font-medium text-sm text-red-600 hover:bg-red-50 transition-colors">
-          Unpaid
-        </button>
-        <button className="px-4 py-2 rounded-lg font-medium text-sm text-green-600 hover:bg-green-50 transition-colors">
-          Paid
-        </button>
-      </div>
-
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <OrderTable onSelectCustomer={setSelectedCustomer} />
+        <OrderTable 
+           orders={data?.data || []} 
+           isLoading={isLoading} 
+           onSelectCustomer={setSelectedCustomer} 
+        />
       </div>
 
       {selectedCustomer && (

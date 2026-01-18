@@ -9,9 +9,10 @@ interface ProductTableProps {
   products: Product[]
   isLoading?: boolean
   isError?: boolean
+  onEdit?: (product: Product) => void
 }
 
-const ProductTableComponent = ({ products = [], isLoading = false, isError = false }: ProductTableProps) => {
+const ProductTableComponent = ({ products = [], isLoading = false, isError = false, onEdit }: ProductTableProps) => {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
 
@@ -138,6 +139,7 @@ const ProductTableComponent = ({ products = [], isLoading = false, isError = fal
                     <button
                       className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                       aria-label={`Edit ${product.productName}`}
+                      onClick={() => onEdit?.(product)}
                     >
                       <Edit className="w-4 h-4" aria-hidden="true" />
                     </button>

@@ -14,3 +14,12 @@ export const createProduct = async (data: FormData): Promise<CreateProductRespon
   });
   return response.data;
 };
+
+export const updateProduct = async (id: string, data: FormData): Promise<CreateProductResponse> => {
+  const response = await api.put<CreateProductResponse>(`/product/update-product/${id}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
