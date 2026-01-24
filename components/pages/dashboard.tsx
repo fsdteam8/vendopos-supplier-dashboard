@@ -6,8 +6,10 @@ import { ChartCard } from "@/components/ui/chart-card"
 import { ProductTable } from "@/components/ui/product-table"
 import { DollarSign, ShoppingCart, Box, TrendingUp } from "lucide-react"
 import { mockDashboardData } from "@/lib/mock-data"
+import { useProducts } from "@/app/features/products/hooks/useProducts"
 
 export default function Dashboard() {
+  const { data, isLoading, isError } = useProducts()
   const stats = useMemo(
     () => [
       {
@@ -61,7 +63,7 @@ export default function Dashboard() {
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-6">Product Inventory</h2>
         <p className="text-sm text-gray-600 mb-4">Manage your products and update prices</p>
-        <ProductTable />
+        <ProductTable products={data?.data || []} isLoading={isLoading} isError={isError} />
       </div>
 
       {/* Bottom Section */}

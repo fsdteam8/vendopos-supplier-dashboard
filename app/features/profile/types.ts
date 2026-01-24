@@ -14,6 +14,7 @@ export interface UserProfile {
     public_id: string;
   };
   isVerified: boolean;
+  stripeOnboardingCompleted: boolean;
   isSuspended: boolean;
   createdAt: string;
   updatedAt: string;

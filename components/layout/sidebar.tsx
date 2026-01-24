@@ -1,5 +1,5 @@
 "use client"
-import { LayoutDashboard, Package, ShoppingCart, User, LogOut } from "lucide-react"
+import { LayoutDashboard, Package, ShoppingCart, User, LogOut, CreditCard } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { useProfile } from "@/app/features/profile/hooks/useProfile"
@@ -15,6 +15,7 @@ const menuItems = [
   { id: "products", label: "Products", icon: Package },
   { id: "orders", label: "Order History", icon: ShoppingCart },
   { id: "profile", label: "Profile", icon: User },
+  { id: "payments", label: "Payments", icon: CreditCard },
 ]
 
 export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
