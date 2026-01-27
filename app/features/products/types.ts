@@ -5,13 +5,13 @@ export interface ProductImage {
 }
 
 export interface ProductVariant {
-  discount: number;
   label: string;
   price: number;
   stock: number;
   unit: string;
+  discount: number;
+  discountPrice: number;
   _id: string;
-  discountPrice?: number;
 }
 
 export interface ProductVariantInput {
@@ -27,10 +27,15 @@ export interface Category {
   region: string;
 }
 
+export interface ProductSEO {
+  metaTitle: string;
+  metaDescription: string;
+}
+
 export interface Product {
   _id: string;
   userId: string;
-  categoryId: Category;
+  categoryId: string | null; // Updated: API returns null, not Category object
   supplierId: string;
   title: string;
   slug: string;
@@ -41,27 +46,55 @@ export interface Product {
   productName: string;
   variants: ProductVariant[];
   priceFrom: number;
+  discountPriceFrom?: number; 
+  showOnlyDiscount?: number; 
   shelfLife: string;
-  originCountry: string;
-  isHalal: boolean;
-  isOrganic: boolean;
-  isFrozen: boolean;
-  isKosher: boolean;
+  originCountry?: string;
+  isHalal?: boolean;
+  isOrganic?: boolean;
+  isFrozen?: boolean;
+  isKosher?: boolean;
+  isVendorBrand?: boolean; 
+  isPallet?: boolean; 
+  seo?: ProductSEO; 
+  averageRating?: number;
+  totalRatings: number;
   status: string;
   isFeatured: boolean;
+  isAvailable: boolean;
+  addBy: string;
+  wholesaleId?: string[];
   createdAt: string;
   updatedAt: string;
-  isAvailable: boolean;
-  quantity: number;
-  sales?: number; // Kept as optional if not in API but used in UI
-  revenue?: number | string; // Kept as optional if not in API but used in UI
+  // UI-only properties (not from API)
+  quantity?: number;
+  sales?: number;
+  revenue?: number | string;
+}
+
+export interface ProductsMeta {
+  page: number;
+  limit: number;
+  totalProducts: number;
+  totalPage: number;
+}
+
+export interface ProductsAnalytics {
+  totalProducts: number;
+  totalOrder: number;
+}
+
+export interface ProductsData {
+  data: Product[];
+  meta: ProductsMeta;
+  analytics: ProductsAnalytics;
 }
 
 export interface GetProductsResponse {
   success: boolean;
   message: string;
   statusCode: number;
-  data: Product[];
+  data: ProductsData; // Updated: Should be ProductsData, not Product[]
 }
 
 export interface CreateProductResponse {

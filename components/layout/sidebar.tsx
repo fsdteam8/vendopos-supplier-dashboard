@@ -40,7 +40,7 @@ export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
               key={item.id}
               onClick={() => setCurrentPage(item.id)}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left text-sm font-medium",
+                "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left text-sm font-medium cursor-pointer",
                 isActive ? "bg-primary text-white" : "text-black hover:bg-primary hover:text-white",
               )}
               aria-current={isActive ? "page" : undefined}
@@ -64,14 +64,14 @@ export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
               )}
             </div>
             <div>
-              <p className="text-sm font-medium truncate w-[100px]">{userData ? `${userData.firstName} ${userData.lastName}` : "User"}</p>
-              <p className="text-xs text-white/60 capitalize">{userData?.role || "Member"}</p>
+              <p className="text-sm font-medium truncate text-black w-[100px]">{userData ? `${userData.firstName} ${userData.lastName}` : "User"}</p>
+              <p className="text-xs text-black capitalize">{userData?.role || "Member"}</p>
             </div>
           </div>
         </div>
         <button
           onClick={() => signOut()}
-          className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors text-sm font-medium"
+          className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-white text-md bg-red-300 cursor-pointer text-center transition-colors  font-medium"
           aria-label="Logout"
         >
           <LogOut className="w-4 h-4" />

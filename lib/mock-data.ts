@@ -1,9 +1,5 @@
 export const mockDashboardData = {
-  salesByProduct: [
-    { name: "Wireless Headph...", value: 120 },
-    { name: "Smart Watch", value: 90 },
-    { name: "Laptop Stand", value: 180 },
-  ],
+
   weeklySalesTrend: [
     { name: "Mon", value: 30 },
     { name: "Tue", value: 38 },
