@@ -67,9 +67,26 @@ export interface Order {
   items: OrderItem[];
 }
 
+export interface GetOrdersParams {
+  page?: number;
+  limit?: number;
+  orderStatus?: string;
+  paymentStatus?: string;
+  paymentType?: string;
+  sort?: string;
+}
+
+export interface Meta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage: number;
+}
+
 export interface GetOrdersResponse {
   success: boolean;
   message: string;
   statusCode: number;
   data: Order[];
+  meta?: Meta;
 }

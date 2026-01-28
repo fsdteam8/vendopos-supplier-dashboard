@@ -204,7 +204,7 @@ export function AddProductModal({ onClose, onSuccess, product }: AddProductModal
             <h2 className="text-xl font-bold text-gray-900">{product ? "Edit Product" : "Add New Product"}</h2>
             <p className="text-sm text-gray-600 mt-0.5">{product ? "Update product details." : "Fill in the details to create a new product."}</p>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg cursor-pointer">
             <X className="w-5 h-5 text-gray-600" />
           </button>
         </div>
@@ -312,7 +312,7 @@ export function AddProductModal({ onClose, onSuccess, product }: AddProductModal
                 {imagePreviews.map((src, idx) => (
                   <div key={idx} className="relative w-32 h-32 border rounded-lg overflow-hidden group">
                     <img src={src} alt="Preview" className="w-full h-full object-cover" />
-                    <button type="button" onClick={() => removeImage(idx)} className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button type="button" onClick={() => removeImage(idx)} className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -338,7 +338,7 @@ export function AddProductModal({ onClose, onSuccess, product }: AddProductModal
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b pb-2">
                <h3 className="font-semibold text-gray-900">Variants</h3>
-               <button type="button" onClick={() => append({ label: "", price: 0, stock: 0, unit: "kg", discount: 0 })} className="text-sm text-[#1B7D6E] flex items-center gap-1 font-medium">
+               <button type="button" onClick={() => append({ label: "", price: 0, stock: 0, unit: "kg", discount: 0 })} className="text-sm text-[#1B7D6E] flex items-center gap-1 font-medium cursor-pointer">
                  <Plus className="w-4 h-4" /> Add Variant
                </button>
             </div>
@@ -367,7 +367,7 @@ export function AddProductModal({ onClose, onSuccess, product }: AddProductModal
                       <label className="text-xs font-medium text-gray-500 mb-1 block">Discount</label>
                       <input type="number" {...register(`variants.${index}.discount`)} className="w-full px-3 py-2 text-sm border rounded-md" />
                        {fields.length > 1 && (
-                        <button type="button" onClick={() => remove(index)} className="absolute -right-3 -top-3 p-1 bg-red-100 text-red-600 rounded-full hover:bg-red-200">
+                        <button type="button" onClick={() => remove(index)} className="absolute -right-3 -top-3 p-1 bg-red-100 text-red-600 rounded-full hover:bg-red-200 cursor-pointer">
                            <Trash2 className="w-3 h-3" />
                         </button>
                        )}
@@ -379,8 +379,8 @@ export function AddProductModal({ onClose, onSuccess, product }: AddProductModal
           </div>
 
           <div className="pt-4 flex justify-end gap-3 border-t">
-             <button type="button" onClick={onClose} className="px-6 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
-             <button type="submit" disabled={isSubmitting} className="px-6 py-2 bg-[#1B7D6E] text-white rounded-lg hover:bg-[#155D5C] disabled:opacity-50 flex items-center gap-2">
+             <button type="button" onClick={onClose} className="px-6 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 cursor-pointer">Cancel</button>
+             <button type="submit" disabled={isSubmitting} className="px-6 py-2 bg-[#1B7D6E] text-white rounded-lg hover:bg-[#155D5C] disabled:opacity-50 flex items-center gap-2 cursor-pointer">
                 {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isSubmitting ? "Creating..." : "Save Product"}
              </button>
