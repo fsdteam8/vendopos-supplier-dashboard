@@ -16,6 +16,7 @@ const menuItems = [
   { id: "orders", label: "Order History", icon: ShoppingCart },
   { id: "profile", label: "Profile", icon: User },
   { id: "payments", label: "Payments", icon: CreditCard },
+  { id: "notifications", label: "Notifications", icon: ShoppingCart },
 ]
 
 export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
