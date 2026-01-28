@@ -118,7 +118,7 @@ const mode = (searchParams.get("mode") as "register" | "forgot") || "register";
       <div className="w-full max-w-xl bg-white rounded-xl shadow-lg p-8">
         <div className="flex justify-center mb-4">
           <Image
-            src="/images/logo.svg"
+            src="/logo.svg"
             alt="logo"
             width={50}
             height={50}
