@@ -6,8 +6,9 @@ export const useOnboarding = () => {
   return useMutation({
     mutationFn: onboardService.createOnboardingLink,
     onSuccess: (data) => {
-      if (data.success && data.data.url) {
-        window.open(data.data.url, "_blank");
+      console.log('redirect data',data?.success)
+      if (data?.success && data?.data?.onboardingLink?.url) {
+        window.open(data?.data?.onboardingLink.url, "_blank");
       } else {
         toast({
           title: "Error",

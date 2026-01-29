@@ -4,12 +4,13 @@ import { useMemo } from "react"
 import { StatCard } from "@/components/ui/stat-card"
 import { ChartCard } from "@/components/ui/chart-card"
 import { ProductTable } from "@/components/ui/product-table"
-import { DollarSign, ShoppingCart, Box, TrendingUp } from "lucide-react"
+import { DollarSign, ShoppingCart, Box, TrendingUp, TrendingDown } from "lucide-react"
 import { useProducts } from "@/app/features/products/hooks/useProducts"
 import { useAnalytics, useProductsRevenue, useSalesTrend } from "@/hooks/useOverView"
 import { ProductAnalyticsApiResponse, SupplierChartData } from "@/types/overview"
 import Revenue from "../chart/ProductSels"
 import SalesByRegion from "../chart/SalesByRegion"
+import Image from "next/image"
 
 export default function Dashboard() {
   const currentYear = "2026"
@@ -102,7 +103,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Performing Months (based on revenue data) */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Performance</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Sale Product</h3>
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
             {revenueLoading ? (
               <p className="text-sm text-gray-500">Loading revenue data...</p>
@@ -114,14 +115,23 @@ export default function Dashboard() {
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold text-gray-500">#{idx + 1}</span>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{item.month}</p>
-                      <p className="text-xs text-gray-500">{item.sales} sales</p>
+                    <div className="flex items-center justify-between  gap-3">
+                      <div>
+                        <Image className=" rounded-2xl object-cover w-12 h-12" src={'/images/dash.png'} width={40} height={40}  alt="dash" />
+                      </div>
+                      <div>
+
+                      <p className="text-base font-medium text-[#101828]">{item.month}</p>
+                      <p className="text-base text-[#6A7282] font-normal">{item.sales} sales</p>
+                      </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-gray-900">${item.totalRevenue}</p>
-                    <p className="text-xs text-green-600">Total Revenue</p>
+                    <p className="text-base leading-6   font-semibold text-gray-900">${item.totalRevenue}</p>
+                    <p className="text-base flex items-center gap-2 text-green-600">
+                      <TrendingUp className=" w-4 h-4 " />
+                      12%
+                    </p>
                   </div>
                 </div>
               ))
@@ -133,26 +143,35 @@ export default function Dashboard() {
 
         {/* Sales Trend Details */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Sales Trend Details</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Low Stock Alerts</h3>
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
             {salesTrendLoading ? (
                <p className="text-sm text-gray-500">Loading sales trend...</p>
             ) : salesTrend.length > 0 ? (
               salesTrend.map((item: SupplierChartData, idx: number) => (
-                <div
+               <div
                   key={idx}
                   className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold text-gray-500">#{idx + 1}</span>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{item.month}</p>
-                      <p className="text-xs text-gray-500">{item.totalRevenue} revenue</p>
+                    <div className="flex items-center justify-between  gap-3">
+                      <div>
+                        <Image className=" rounded-2xl object-cover w-12 h-12" src={'/images/dash.png'} width={40} height={40}  alt="dash" />
+                      </div>
+                      <div>
+
+                      <p className="text-base font-medium text-[#101828]">{item.month}</p>
+                      <p className="text-base text-[#6A7282] font-normal">{item.sales} sales</p>
+                      </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-[#1B7D6E]">{item.sales} sales</p>
-                    <p className="text-xs text-blue-600">Volume</p>
+                    <p className="text-base leading-6   font-semibold text-gray-900">${item.totalRevenue}</p>
+                    <p className="text-base flex items-center gap-2 text-green-600">
+                      <TrendingDown  className=" w-4 h-4 " />
+                      Low Stock
+                    </p>
                   </div>
                 </div>
               ))
