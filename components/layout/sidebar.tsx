@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { useProfile } from "@/app/features/profile/hooks/useProfile"
 import { signOut } from "next-auth/react"
+import Link from "next/link"
 
 interface SidebarProps {
   currentPage: string
@@ -26,9 +27,12 @@ export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
   return (
     <div className="w-56 bg-[#1D4E890A] text-white flex flex-col">
       {/* Logo */}
-      <div className="px-6 py-8 border-b border-white/10 mx-auto">
-        <Image src="/logo.svg" alt="Logo" width={100} height={100} />
-      </div>
+      <Link href="/" className="flex justify-center">
+      
+        <div className="px-6 py-8 border-b border-white/10 mx-auto">
+          <Image src="/logo.svg" alt="Logo" width={100} height={100} />
+        </div>
+      </Link>
 
       {/* Menu Items */}
       <nav className="flex-1 px-3 py-6 space-y-2">
@@ -72,7 +76,7 @@ export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
         </div>
         <button
           onClick={() => signOut()}
-          className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-white text-md bg-red-300 cursor-pointer text-center transition-colors  font-medium"
+          className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-white text-md bg-red-500 hover:bg-red-400 cursor-pointer text-center transition-colors  font-medium"
           aria-label="Logout"
         >
           <LogOut className="w-4 h-4" />

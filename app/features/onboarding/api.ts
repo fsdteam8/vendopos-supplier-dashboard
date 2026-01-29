@@ -3,7 +3,7 @@ import { OnboardingResponse } from "./types";
 
 export const onboardService = {
   createOnboardingLink: async (): Promise<OnboardingResponse> => {
-    const response = await api.get<OnboardingResponse>("/onboard/create");
+    const response = await api.post<OnboardingResponse>("/onboard/create");
     return response.data;
   },
   getStripeLink: async (): Promise<OnboardingResponse> => {

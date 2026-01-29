@@ -38,6 +38,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { is } from "date-fns/locale";
+import { on } from "events";
 
 const mockTransactions = [
   {
@@ -166,7 +167,35 @@ export default function Payments() {
             Track your earnings and transaction history
           </p>
         </div>
-        <Button
+        {isOnboarded  ?  <Button
+          onClick={() => createOnboarding()}
+          disabled={isCreating}
+          className="cursor-pointer"
+        >
+          {isCreating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            "Go To Payment Dashboard"
+          )}
+        </Button> : (
+          <Button
+            onClick={() => createOnboarding()}
+            disabled={isCreating}
+          >
+            {isCreating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Payout Settings"
+            )}
+          </Button>
+        )}
+        {/* <Button
           onClick={() => createOnboarding()}
           disabled={isCreating}
           className="cursor-pointer"
@@ -179,7 +208,7 @@ export default function Payments() {
           ) : (
             "Payout Settings"
           )}
-        </Button>
+        </Button> */}
       </div>
 
       {/* Stats Grid */}
@@ -280,7 +309,7 @@ export default function Payments() {
               ) : (
                 <ExternalLink className="mr-2 h-4 w-4" />
               )}
-              Go Stripe
+              Go to Payment Dashboard
             </Button>
           </DialogFooter>
         </DialogContent>

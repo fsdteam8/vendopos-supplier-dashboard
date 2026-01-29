@@ -1,4 +1,5 @@
 export interface OnboardingResponse {
+  [x: string]: any;
   success: boolean;
   message: string;
   statusCode: number;
