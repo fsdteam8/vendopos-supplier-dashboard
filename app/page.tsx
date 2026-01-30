@@ -10,6 +10,7 @@ import Profile from "@/components/pages/profile";
 import Payments from "@/components/pages/payments";
 import NotificationListener from "@/components/pages/NotificationListener";
 import { Header } from "@/components/layout/header";
+import PaymentTransaction from "@/components/pages/PaymentTransaction";
 
 type PageType =
   | "dashboard"
@@ -17,7 +18,8 @@ type PageType =
   | "orders"
   | "profile"
   | "payments"
-  | "notifications";
+  | "notifications"
+  | "PaymentSettlement";
 
 export default function Home() {
   return (
@@ -66,6 +68,8 @@ function HomeContent() {
         return <Profile />;
       case "payments":
         return <Payments />;
+      case "PaymentSettlement":
+        return <PaymentTransaction />;
       case "notifications":
         return <NotificationListener />;
       default:
