@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import Dashboard from "@/components/pages/dashboard";
-import Products from "@/components/pages/products";
-import OrderHistory from "@/components/pages/order-history";
-import Profile from "@/components/pages/profile";
-import Payments from "@/components/pages/payments";
 import NotificationListener from "@/components/pages/NotificationListener";
-import { Header } from "@/components/layout/header";
+import OrderHistory from "@/components/pages/order-history";
+import Payments from "@/components/pages/payments";
 import PaymentTransaction from "@/components/pages/PaymentTransaction";
+import Products from "@/components/pages/products";
+import Profile from "@/components/pages/profile";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 type PageType =
   | "dashboard"
@@ -80,10 +80,13 @@ function HomeContent() {
   return (
     <div className="flex h-screen bg-background">
       <div className="flex justify-between">
-        <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+        <Sidebar
+          currentPage={currentPage}
+          setCurrentPage={(page: string) => setCurrentPage(page as PageType)}
+        />
       </div>
       <div className="flex flex-col flex-1 overflow-hidden">
-        <Header setCurrentPage={setCurrentPage} />
+        <Header setCurrentPage={(page: string) => setCurrentPage(page as PageType)} />
         <main className="flex-1 overflow-auto">{renderPage()}</main>
       </div>
     </div>
