@@ -65,6 +65,7 @@ export interface Order {
   billingInfo: BillingInfo;
   purchaseDate: string;
   items: OrderItem[];
+  meta?: Meta;
 }
 
 export interface GetOrdersParams {

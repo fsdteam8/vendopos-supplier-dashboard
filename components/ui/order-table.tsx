@@ -1,10 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, memo } from "react";
-import { Eye } from "lucide-react";
 import { Order } from "@/app/features/order/types";
-import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -12,6 +8,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
+import { Eye } from "lucide-react";
+import { memo, useCallback } from "react";
+import PaginationPage from "./PaginationPage";
 
 interface OrderTableProps {
   orders: Order[];
@@ -38,13 +39,7 @@ const OrderTableComponent = ({
   onFilterChange,
   filters,
 }: OrderTableProps) => {
-  const handlePrevPage = useCallback(() => {
-    onPageChange(Math.max(1, currentPage - 1));
-  }, [currentPage, onPageChange]);
-
-  const handleNextPage = useCallback(() => {
-    onPageChange(Math.min(totalPages, currentPage + 1));
-  }, [currentPage, totalPages, onPageChange]);
+  const meta = orders[0]?.meta;
 
   const getStatusColor = useCallback((status: string) => {
     switch (status) {
@@ -76,11 +71,36 @@ const OrderTableComponent = ({
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer" value="all">All Status</SelectItem>
-              <SelectItem className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer" value="pending">Pending</SelectItem>
-              <SelectItem className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer" value="processing">Processing</SelectItem>
-              <SelectItem className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer" value="delivered">Delivered</SelectItem>
-              <SelectItem className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer" value="cancelled">Cancelled</SelectItem>
+              <SelectItem
+                className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer"
+                value="all"
+              >
+                All Status
+              </SelectItem>
+              <SelectItem
+                className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer"
+                value="pending"
+              >
+                Pending
+              </SelectItem>
+              <SelectItem
+                className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer"
+                value="processing"
+              >
+                Processing
+              </SelectItem>
+              <SelectItem
+                className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer"
+                value="delivered"
+              >
+                Delivered
+              </SelectItem>
+              <SelectItem
+                className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer"
+                value="cancelled"
+              >
+                Cancelled
+              </SelectItem>
             </SelectContent>
           </Select>
 
@@ -92,9 +112,24 @@ const OrderTableComponent = ({
               <SelectValue placeholder="Payment Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer" value="all">Payment Status</SelectItem>
-              <SelectItem className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer" value="paid">Paid</SelectItem>
-              <SelectItem className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer" value="unpaid">Unpaid</SelectItem>
+              <SelectItem
+                className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer"
+                value="all"
+              >
+                Payment Status
+              </SelectItem>
+              <SelectItem
+                className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer"
+                value="paid"
+              >
+                Paid
+              </SelectItem>
+              <SelectItem
+                className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer"
+                value="unpaid"
+              >
+                Unpaid
+              </SelectItem>
             </SelectContent>
           </Select>
 
@@ -106,8 +141,18 @@ const OrderTableComponent = ({
               <SelectValue placeholder="Sort By" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer" value="newest">Newest First</SelectItem>
-              <SelectItem className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer" value="oldest">Oldest First</SelectItem>
+              <SelectItem
+                className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer"
+                value="newest"
+              >
+                Newest First
+              </SelectItem>
+              <SelectItem
+                className="hover:bg-[#1B7D6E] hover:text-white cursor-pointer"
+                value="oldest"
+              >
+                Oldest First
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -221,7 +266,7 @@ const OrderTableComponent = ({
       </div>
 
       {/* Pagination */}
-      <nav
+      {/* <nav
         className="flex items-center justify-center gap-2 px-6 py-4 border-t border-gray-200 bg-gray-50"
         aria-label="Order table pagination"
       >
@@ -244,7 +289,15 @@ const OrderTableComponent = ({
         >
           →
         </button>
-      </nav>
+      </nav> */}
+
+      <PaginationPage
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+        totalItems={meta?.totalPage || 0}
+        itemsPerPage={meta?.limit || 0}
+      />
     </div>
   );
 };
