@@ -1,27 +1,46 @@
-"use client"
+"use client";
 
-import { useMemo } from "react"
-import { StatCard } from "@/components/ui/stat-card"
-import { ChartCard } from "@/components/ui/chart-card"
-import { ProductTable } from "@/components/ui/product-table"
-import { DollarSign, ShoppingCart, Box, TrendingUp, TrendingDown } from "lucide-react"
-import { useProducts } from "@/app/features/products/hooks/useProducts"
-import { useAnalytics, useProductsRevenue, useSalesTrend } from "@/hooks/useOverView"
-import { ProductAnalyticsApiResponse, SupplierChartData } from "@/types/overview"
-import Revenue from "../chart/ProductSels"
-import SalesByRegion from "../chart/SalesByRegion"
-import Image from "next/image"
+import { useProducts } from "@/app/features/products/hooks/useProducts";
+import { StatCard } from "@/components/ui/stat-card";
+import {
+  useAnalytics,
+  useProductsRevenue,
+  useSalesTrend,
+} from "@/hooks/useOverView";
+import {
+  ProductAnalyticsApiResponse,
+  SupplierChartData,
+} from "@/types/overview";
+import {
+  Box,
+  DollarSign,
+  ShoppingCart,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
+import Image from "next/image";
+import { useMemo } from "react";
+import Revenue from "../chart/ProductSels";
+import SalesByRegion from "../chart/SalesByRegion";
 
 export default function Dashboard() {
-  const currentYear = "2026"
-  const { data: productsResult, isLoading: productsLoading, isError: productsError } = useProducts()
-  const { data: revenueResult, isLoading: revenueLoading } = useProductsRevenue(currentYear)
-  const { data: salesTrendResult, isLoading: salesTrendLoading } = useSalesTrend(currentYear)
-  const { data: analyticsResult, isLoading: analyticsLoading } = useAnalytics()
+  const currentYear = "2026";
+  const {
+    data: productsResult,
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useProducts();
+  const { data: revenueResult, isLoading: revenueLoading } =
+    useProductsRevenue(currentYear);
+  const { data: salesTrendResult, isLoading: salesTrendLoading } =
+    useSalesTrend(currentYear);
+  const { data: analyticsResult, isLoading: analyticsLoading } = useAnalytics();
 
-  const productsRevenue = (revenueResult as ProductAnalyticsApiResponse)?.data?.chart || []
-  const salesTrend = (salesTrendResult as ProductAnalyticsApiResponse)?.data?.chart || []
-  const analyticsData = analyticsResult?.data || {}
+  const productsRevenue =
+    (revenueResult as ProductAnalyticsApiResponse)?.data?.chart || [];
+  const salesTrend =
+    (salesTrendResult as ProductAnalyticsApiResponse)?.data?.chart || [];
+  const analyticsData = analyticsResult?.data || {};
 
   const stats = useMemo(
     () => [
@@ -55,23 +74,25 @@ export default function Dashboard() {
       },
     ],
     [analyticsData],
-  )
+  );
 
   const productsRevenueChartData = useMemo(
-    () => productsRevenue.map((item: SupplierChartData) => ({
-      name: item.month,
-      value: item.totalRevenue
-    })),
-    [productsRevenue]
-  )
+    () =>
+      productsRevenue.map((item: SupplierChartData) => ({
+        name: item.month,
+        value: item.totalRevenue,
+      })),
+    [productsRevenue],
+  );
 
   const salesTrendChartData = useMemo(
-    () => salesTrend.map((item: SupplierChartData) => ({
-      name: item.month,
-      value: item.sales
-    })),
-    [salesTrend]
-  )
+    () =>
+      salesTrend.map((item: SupplierChartData) => ({
+        name: item.month,
+        value: item.sales,
+      })),
+    [salesTrend],
+  );
 
   return (
     <div className="p-8 space-y-8">
@@ -84,12 +105,12 @@ export default function Dashboard() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-       <div className="bg-white rounded-lg shadow">
-            <Revenue />
-          </div>
-          <div className="bg-white rounded-lg shadow">
-            <SalesByRegion />
-          </div>
+        <div className="bg-white rounded-lg shadow">
+          <Revenue />
+        </div>
+        <div className="bg-white rounded-lg shadow">
+          <SalesByRegion />
+        </div>
       </div>
 
       {/* Product Inventory Table */}
@@ -103,7 +124,9 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Performing Months (based on revenue data) */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Sale Product</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Top Sale Product
+          </h3>
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
             {revenueLoading ? (
               <p className="text-sm text-gray-500">Loading revenue data...</p>
@@ -114,20 +137,33 @@ export default function Dashboard() {
                   className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-gray-500">#{idx + 1}</span>
+                    <span className="text-sm font-semibold text-gray-500">
+                      #{idx + 1}
+                    </span>
                     <div className="flex items-center justify-between  gap-3">
                       <div>
-                        <Image className=" rounded-2xl object-cover w-12 h-12" src={'/images/dash.png'} width={40} height={40}  alt="dash" />
+                        <Image
+                          className=" rounded-2xl object-cover w-12 h-12"
+                          src={"/images/dash.png"}
+                          width={40}
+                          height={40}
+                          alt="dash"
+                        />
                       </div>
                       <div>
-
-                      <p className="text-base font-medium text-[#101828]">{item.month}</p>
-                      <p className="text-base text-[#6A7282] font-normal">{item.sales} sales</p>
+                        <p className="text-base font-medium text-[#101828]">
+                          {item.month}
+                        </p>
+                        <p className="text-base text-[#6A7282] font-normal">
+                          {item.sales} sales
+                        </p>
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-base leading-6   font-semibold text-gray-900">${item.totalRevenue}</p>
+                    <p className="text-base leading-6   font-semibold text-gray-900">
+                      ${item.totalRevenue}
+                    </p>
                     <p className="text-base flex items-center gap-2 text-green-600">
                       <TrendingUp className=" w-4 h-4 " />
                       12%
@@ -136,51 +172,70 @@ export default function Dashboard() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-gray-500">No revenue data available for {currentYear}</p>
+              <p className="text-sm text-gray-500">
+                No revenue data available for {currentYear}
+              </p>
             )}
           </div>
         </div>
 
         {/* Sales Trend Details */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Low Stock Alerts</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Low Stock Alerts
+          </h3>
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
             {salesTrendLoading ? (
-               <p className="text-sm text-gray-500">Loading sales trend...</p>
+              <p className="text-sm text-gray-500">Loading sales trend...</p>
             ) : salesTrend.length > 0 ? (
               salesTrend.map((item: SupplierChartData, idx: number) => (
-               <div
+                <div
                   key={idx}
                   className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-gray-500">#{idx + 1}</span>
+                    <span className="text-sm font-semibold text-gray-500">
+                      #{idx + 1}
+                    </span>
                     <div className="flex items-center justify-between  gap-3">
                       <div>
-                        <Image className=" rounded-2xl object-cover w-12 h-12" src={'/images/dash.png'} width={40} height={40}  alt="dash" />
+                        <Image
+                          className=" rounded-2xl object-cover w-12 h-12"
+                          src={"/images/dash.png"}
+                          width={40}
+                          height={40}
+                          alt="dash"
+                        />
                       </div>
                       <div>
-
-                      <p className="text-base font-medium text-[#101828]">{item.month}</p>
-                      <p className="text-base text-[#6A7282] font-normal">{item.sales} sales</p>
+                        <p className="text-base font-medium text-[#101828]">
+                          {item.month}
+                        </p>
+                        <p className="text-base text-[#6A7282] font-normal">
+                          {item.sales} sales
+                        </p>
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-base leading-6   font-semibold text-gray-900">${item.totalRevenue}</p>
+                    <p className="text-base leading-6   font-semibold text-gray-900">
+                      ${item.totalRevenue}
+                    </p>
                     <p className="text-base flex items-center gap-2 text-green-600">
-                      <TrendingDown  className=" w-4 h-4 " />
+                      <TrendingDown className=" w-4 h-4 " />
                       Low Stock
                     </p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-gray-500">No sales trend data available for {currentYear}</p>
+              <p className="text-sm text-gray-500">
+                No sales trend data available for {currentYear}
+              </p>
             )}
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
