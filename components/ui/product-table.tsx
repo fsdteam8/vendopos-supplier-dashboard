@@ -19,7 +19,7 @@ const ProductTableComponent = ({
   onEdit,
 }: ProductTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
 
   const { paginatedData, totalPages } = useMemo(() => {
     if (isLoading || isError || !Array.isArray(products))
