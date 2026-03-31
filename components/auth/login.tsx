@@ -85,7 +85,6 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Form */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             {/* Email */}
