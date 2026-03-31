@@ -1,10 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getProducts, updateProduct } from "../api";
+import { ProductParams } from "../types";
 
-export const useProducts = (page: number = 1, limit: number = 10) => {
+export const useProducts = (params: ProductParams) => {
   return useQuery({
-    queryKey: ["products", page, limit],
-    queryFn: () => getProducts({ page, limit }),
+    queryKey: ["products", params],
+    queryFn: () => getProducts(params),
   });
 };
 

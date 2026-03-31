@@ -4,6 +4,16 @@ export interface ProductImage {
   _id: string;
 }
 
+export interface ProductParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  categoryRegion?: string;
+  originCountry?: string;
+  supplierBrand?: string;
+  sort?: string;
+}
+
 export interface ProductVariant {
   label: string;
   price: number;
@@ -46,17 +56,17 @@ export interface Product {
   productName: string;
   variants: ProductVariant[];
   priceFrom: number;
-  discountPriceFrom?: number; 
-  showOnlyDiscount?: number; 
+  discountPriceFrom?: number;
+  showOnlyDiscount?: number;
   shelfLife: string;
   originCountry?: string;
   isHalal?: boolean;
   isOrganic?: boolean;
   isFrozen?: boolean;
   isKosher?: boolean;
-  isVendorBrand?: boolean; 
-  isPallet?: boolean; 
-  seo?: ProductSEO; 
+  isVendorBrand?: boolean;
+  isPallet?: boolean;
+  seo?: ProductSEO;
   averageRating?: number;
   totalRatings: number;
   status: string;
@@ -75,7 +85,7 @@ export interface Product {
 export interface ProductsMeta {
   page: number;
   limit: number;
-  totalProducts: number;
+  totalItems: number;
   totalPage: number;
 }
 
