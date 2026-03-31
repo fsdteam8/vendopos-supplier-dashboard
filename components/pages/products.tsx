@@ -20,17 +20,17 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 export default function Products() {
+  const [params, setParams] = useState({
+    page: 1,
+    limit: 10,
+  });
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const router = useRouter();
 
   const [onboarding, setOnboarding] = useState(false);
-  const [page, setPage] = useState<number>(1);
-  const itemsPerPage = 10;
-  const { data, isLoading, isError, isFetching, refetch } = useProducts(
-    page,
-    itemsPerPage,
-  );
+
+  const { data, isLoading, isError, isFetching, refetch } = useProducts(params);
   const analyticsData = data?.data?.analytics;
   const { data: profile } = useProfile();
 
@@ -103,9 +103,9 @@ export default function Products() {
           isLoading={isLoading}
           isError={isError}
           isFetching={isFetching}
-          totalItems={data?.data?.meta?.totalProducts ?? products.length}
-          externalPage={page}
-          onRequestPage={(p) => setPage(p)}
+          totalItems={analyticsData?.totalProducts}
+          externalPage={params.page}
+          onRequestPage={(p) => setParams((prev) => ({ ...prev, page: p }))}
           onEdit={(product) => {
             setEditingProduct(product);
             setShowAddModal(true);
