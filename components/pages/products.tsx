@@ -1,13 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { AddProductModal } from "@/components/ui/add-product-modal";
-import { ProductTable } from "@/components/ui/product-table";
-import { Box, Plus, TrendingUp } from "lucide-react";
 import { useProducts } from "@/app/features/products/hooks/useProducts";
 import { Product } from "@/app/features/products/types";
 import { useProfile } from "@/app/features/profile/hooks/useProfile";
-import { useRouter } from "next/navigation";
+import { AddProductModal } from "@/components/ui/add-product-modal";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -16,8 +13,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { ProductTable } from "@/components/ui/product-table";
 import { StatCard } from "@/components/ui/stat-card";
+import { Box, Plus, TrendingUp } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 
 export default function Products() {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -25,14 +25,17 @@ export default function Products() {
   const router = useRouter();
 
   const [onboarding, setOnboarding] = useState(false);
-  const { data, isLoading, isError, refetch } = useProducts();
+  const [page, setPage] = useState<number>(1);
+  const itemsPerPage = 10;
+  const { data, isLoading, isError, isFetching, refetch } = useProducts(
+    page,
+    itemsPerPage,
+  );
   const analyticsData = data?.data?.analytics;
   const { data: profile } = useProfile();
 
   const products = data?.data?.data || [];
-  console.log("my product", data);
   const isOnboarded = profile?.data?.stripeOnboardingCompleted;
-  console.log("is onboraded", isOnboarded);
 
   const handleStripeOnboarding = () => {
     if (isOnboarded) {
@@ -79,7 +82,7 @@ export default function Products() {
         </div>
         <button
           onClick={handleStripeOnboarding}
-          className="flex items-center gap-2 px-6 py-3 bg-[#1B7D6E] text-white rounded-lg hover:bg-[#155D5C] transition-colors font-medium text-sm cursor-pointer"
+          className="flex items-center gap-2 px-6 py-3 bg-[#09714e] text-white rounded-lg hover:bg-[#0a6f58] transition-colors font-medium text-sm cursor-pointer"
           aria-label="Add new product"
         >
           <Plus className="w-4 h-4" />
@@ -99,6 +102,10 @@ export default function Products() {
           products={products}
           isLoading={isLoading}
           isError={isError}
+          isFetching={isFetching}
+          totalItems={data?.data?.meta?.totalProducts ?? products.length}
+          externalPage={page}
+          onRequestPage={(p) => setPage(p)}
           onEdit={(product) => {
             setEditingProduct(product);
             setShowAddModal(true);
