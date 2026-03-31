@@ -1,29 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Lock } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 import { Checkbox } from "../ui/checkbox";
 
-// ✅ Zod validation schema
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -56,58 +53,54 @@ const Login = () => {
       });
 
       if (result?.ok) {
-        // Login successful → redirect to home
         window.location.href = "/";
         toast.success("Logged in successfully!");
       } else {
-        // Login failed → show error
-        toast.error(result?.error || "Login failed. Please try again.");
+        toast.error(result?.error || "Login failed.");
       }
     } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Something went wrong.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <section
-      className="min-h-screen flex items-center justify-center 
-  flex-co"
-    >
-      {/* Logo */}
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-      <div className="flex justify-center mb-4">
-        <Image
-          src="/images/logo.svg"
-          alt="logo"
-          width={50}
-          height={60}
-          className=""
-          priority
-        />
-      </div>
-        <h2 className="text-2xl font-semibold text-center text-auth-text mb-1">Welcome!</h2>
-        <p className="text-muted-foreground text-center mb-6">
-          Manage your orders, track shipments, and configure products easily.
-        </p>
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#ecf3ec] to-[#dce9e2] px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 space-y-6">
+        {/* Logo */}
+        <div className="flex justify-center">
+          <div className="bg-[#1B7D6E] p-3 rounded-xl shadow-md">
+            <Lock size={36} className="text-white" />
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className="text-center">
+          <h2 className="text-3xl font-semibold text-gray-800">
+            Supplier Dashboard
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Sign in to access your panel
+          </p>
+        </div>
 
         {/* Form */}
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             {/* Email */}
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-sm text-gray-600">Email</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="hello@example.com" 
-                      {...field} 
+                    <Input
+                      placeholder="hello@example.com"
+                      {...field}
                       disabled={isLoading}
+                      className="h-11 rounded-lg"
                     />
                   </FormControl>
                   <FormMessage />
@@ -121,19 +114,21 @@ const Login = () => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel className="text-sm text-gray-600">
+                    Password
+                  </FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={showPassword ? "text" : "password"}
                         {...field}
                         disabled={isLoading}
+                        className="h-11 rounded-lg pr-10"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-2.5 text-gray-500"
-                        disabled={isLoading}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                       >
                         {showPassword ? (
                           <EyeOff size={18} />
@@ -148,13 +143,13 @@ const Login = () => {
               )}
             />
 
+            {/* Remember + Forgot */}
             <div className="flex justify-between items-center">
-              {/* Remember Me Checkbox */}
               <FormField
                 control={form.control}
                 name="remember"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                  <FormItem className="flex items-center space-x-2">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -162,32 +157,31 @@ const Login = () => {
                         disabled={isLoading}
                       />
                     </FormControl>
-                    <FormLabel className="text-sm font-normal cursor-pointer">
+                    <FormLabel className="text-sm cursor-pointer">
                       Remember me
                     </FormLabel>
                   </FormItem>
                 )}
               />
 
-              <Link 
-                href="/forget-password" 
-                className="text-sm font-medium text-primary hover:text-primary/80 cursor-pointer transition-colors"
+              <Link
+                href="/forget-password"
+                className="text-sm text-[#1B7D6E] hover:underline"
               >
-                Forgot Password
+                Forgot Password?
               </Link>
             </div>
 
-            {/* Submit Button */}
+            {/* Button */}
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-2xl bg-primary hover:bg-gray-800"
+              className="w-full h-11 rounded-lg bg-[#1B7D6E] hover:bg-[#166456] transition"
             >
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
         </Form>
-
       </div>
     </section>
   );
