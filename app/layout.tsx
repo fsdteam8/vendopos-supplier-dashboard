@@ -3,6 +3,7 @@ import AuthProvider from "@/lib/provider/auth-provider";
 import type { Metadata } from "next";
 import "./globals.css";
 import { Geist, Geist_Mono, Montserrat, Poppins } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,6 +52,7 @@ export default function RootLayout({
         <TanstackProvider>
           <AuthProvider>{children}</AuthProvider>
         </TanstackProvider>
+        <Toaster position="top-right" />
         {/* <Analytics /> */}
       </body>
     </html>

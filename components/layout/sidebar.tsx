@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 
 interface SidebarProps {
   currentPage: string;
@@ -94,7 +95,10 @@ export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
           </div>
 
           {/* Logout */}
-          <button className="p-2 rounded-lg hover:bg-red-100 transition">
+          <button 
+            onClick={() => signOut()}
+            className="p-2 rounded-lg hover:bg-red-100 transition"
+          >
             <LogOut className="w-5 h-5 text-red-500 cursor-pointer" />
           </button>
         </div>

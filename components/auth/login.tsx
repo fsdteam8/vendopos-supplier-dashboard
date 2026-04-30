@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -30,6 +31,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -53,8 +55,9 @@ const Login = () => {
       });
 
       if (result?.ok) {
-        window.location.href = "/";
         toast.success("Logged in successfully!");
+        router.push("/");
+        router.refresh();
       } else {
         toast.error(result?.error || "Login failed.");
       }
