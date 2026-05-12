@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useProfile } from "@/app/features/profile/hooks/useProfile";
-import { cn } from "@/lib/utils";
+import { useProfile } from '@/app/features/profile/hooks/useProfile';
+import { cn } from '@/lib/utils';
 import {
   Bell,
   CreditCard,
@@ -10,10 +10,10 @@ import {
   Package,
   ShoppingCart,
   User,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { signOut } from "next-auth/react";
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 
 interface SidebarProps {
   currentPage: string;
@@ -21,13 +21,13 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "products", label: "Products", icon: Package },
-  { id: "orders", label: "Order History", icon: ShoppingCart },
-  { id: "profile", label: "Profile", icon: User },
-  { id: "payments", label: "Payments", icon: CreditCard },
-  { id: "PaymentSettlement", label: "Settlements", icon: CreditCard },
-  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'products', label: 'Products', icon: Package },
+  { id: 'orders', label: 'Order History', icon: ShoppingCart },
+  { id: 'profile', label: 'Profile', icon: User },
+  { id: 'payments', label: 'Payments', icon: CreditCard },
+  { id: 'PaymentSettlement', label: 'Settlements', icon: CreditCard },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
 ];
 
 export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
@@ -54,10 +54,10 @@ export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
                 key={item.id}
                 onClick={() => setCurrentPage(item.id)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-all cursor-pointer",
+                  'w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-all cursor-pointer',
                   isActive
-                    ? "bg-[#09714e] text-white shadow-sm"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-[#09714e]",
+                    ? 'bg-[#09714e] text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-[#09714e]',
                 )}
               >
                 <Icon className="w-5 h-5" />
@@ -74,31 +74,25 @@ export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
           {/* Avatar */}
           <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-sm font-semibold">
             {userData?.image?.url ? (
-              <img
-                src={userData.image.url}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
+              <img src={userData.image.url} alt="Profile" className="w-full h-full object-cover" />
             ) : (
-              userData?.firstName?.charAt(0) || "U"
+              userData?.firstName?.charAt(0) || 'U'
             )}
           </div>
 
           {/* User Info */}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-800 truncate">
-              {userData ? `${userData.firstName} ${userData.lastName}` : "User"}
+              {userData?.firstName || userData?.lastName
+                ? `${userData?.firstName ?? ''} ${userData?.lastName ?? ''}`.trim()
+                : 'User'}
             </p>
-            <p className="text-xs text-gray-500 capitalize">
-              {userData?.role || "Member"}
-            </p>
+
+            <p className="text-xs text-gray-500 capitalize">{userData?.role || 'Member'}</p>
           </div>
 
           {/* Logout */}
-          <button 
-            onClick={() => signOut()}
-            className="p-2 rounded-lg hover:bg-red-100 transition"
-          >
+          <button onClick={() => signOut()} className="p-2 rounded-lg hover:bg-red-100 transition">
             <LogOut className="w-5 h-5 text-red-500 cursor-pointer" />
           </button>
         </div>
