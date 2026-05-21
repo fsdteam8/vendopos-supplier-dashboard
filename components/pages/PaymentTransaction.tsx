@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useMemo, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   ChevronDown,
   Loader2,
@@ -22,7 +22,7 @@ import {
   Clock,
   XCircle,
   Send,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,14 +30,14 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { useAllSettlements } from "@/hooks/usePaymentSettlement";
-import { Analytics, Settlement } from "@/types/paymentTransfer";
-
+} from '@/components/ui/dropdown-menu';
+import { useAllSettlements } from '@/hooks/usePaymentSettlement';
+import { Analytics, Settlement } from '@/types/paymentTransfer';
+import PaginationPage from '../ui/PaginationPage';
 
 const PaymenTransfer = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [status, setStatus] = useState<string>("");
+  const [status, setStatus] = useState<string>('');
 
   const { data: settlementResponse, isLoading, isError } = useAllSettlements();
 
@@ -53,8 +53,30 @@ const PaymenTransfer = () => {
         : [];
 
   const analytics: Analytics | undefined = settlementResponse?.analytics;
+  console.log('settlements', settlementsRaw);
+
   const meta = settlementResponse?.meta;
   const totalPage = meta?.totalPages || 1;
+  const itemsPerPage = 10;
+
+  const { paginatedData, totalPages } = useMemo(() => {
+    if (isLoading || isError || !Array.isArray(settlements)) {
+      return { paginatedData: [], totalPages: 1 };
+    }
+
+    const filteredData = status
+      ? settlements.filter((s: Settlement) => s.status.toLowerCase() === status.toLowerCase())
+      : settlements;
+
+    const total = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
+    const safePage = Math.min(currentPage, total);
+    const data = filteredData.slice((safePage - 1) * itemsPerPage, safePage * itemsPerPage);
+
+    return {
+      paginatedData: data,
+      totalPages: total,
+    };
+  }, [currentPage, settlements, status, itemsPerPage, isLoading, isError]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -66,7 +88,7 @@ const PaymenTransfer = () => {
   };
 
   const clearFilters = () => {
-    setStatus("");
+    setStatus('');
     setCurrentPage(1);
   };
 
@@ -88,65 +110,66 @@ const PaymenTransfer = () => {
 
   // Filter settlements on client side since the current hook doesn't support params
   const filteredSettlements = status
-    ? settlements.filter(
-        (s: Settlement) => s.status.toLowerCase() === status.toLowerCase(),
-      )
+    ? settlements.filter((s: Settlement) => s.status.toLowerCase() === status.toLowerCase())
     : settlements;
 
   const handleTransaction = (settlement: Settlement) => {
     // Implement the logic to handle transaction details view
-    console.log("Transaction details for settlement:", settlement);
+    console.log('Transaction details for settlement:', settlement);
   };
 
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="p-6 mx-auto container space-y-6">
         {/* Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-black">
-          <Card className="bg-white border-0 shadow-sm">
-            <CardContent className="flex items-center justify-between p-6">
-              <div>
-                <CardTitle className="text-sm font-medium mb-3 text-gray-600">
-                  Total Transferred
-                </CardTitle>
-                <p className="text-3xl font-bold text-gray-900">
-                  ${analytics?.totalTransferred?.toLocaleString() || 0}
-                </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {/* Total Transferred */}
+          <Card className="border border-gray-200 rounded-2xl bg-white">
+            <CardContent className="p-6 flex items-center justify-between">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-500">Total Transferred</p>
+
+                <h2 className="text-3xl font-bold text-gray-900">
+                  {analytics?.totalTransferred || 0}
+                </h2>
               </div>
-              <div>
-                <CheckCircle className="w-14 h-14 bg-[#086646] text-white rounded-md p-3" />
+
+              <div className="w-14 h-14 rounded-xl bg-green-50 flex items-center justify-center">
+                <CheckCircle className="w-7 h-7 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-0 shadow-sm">
-            <CardContent className="flex items-center justify-between p-6">
-              <div>
-                <CardTitle className="text-sm font-medium mb-3 text-amber-600">
-                  Total Pending
-                </CardTitle>
-                <p className="text-3xl font-bold text-amber-600">
-                  ${analytics?.totalPending?.toLocaleString() || 0}
-                </p>
+          {/* Pending */}
+          <Card className="border border-gray-200 rounded-2xl bg-white">
+            <CardContent className="p-6 flex items-center justify-between">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-500">Total Pending</p>
+
+                <h2 className="text-3xl font-bold text-amber-600">
+                  {analytics?.totalPending || 0}
+                </h2>
               </div>
-              <div>
-                <Clock className="w-14 h-14 bg-[#f59e0b] text-white rounded-md p-3" />
+
+              <div className="w-14 h-14 rounded-xl bg-amber-50 flex items-center justify-center">
+                <Clock className="w-7 h-7 text-amber-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-0 shadow-sm">
-            <CardContent className="flex items-center justify-between p-6">
-              <div>
-                <CardTitle className="text-sm font-medium mb-3 text-blue-600">
-                  Total Requested
-                </CardTitle>
-                <p className="text-3xl font-bold text-blue-600">
-                  ${analytics?.totalRequested?.toLocaleString() || 0}
-                </p>
+          {/* Requested */}
+          <Card className="border border-gray-200 rounded-2xl bg-white">
+            <CardContent className="p-6 flex items-center justify-between">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-500">Total Requested</p>
+
+                <h2 className="text-3xl font-bold text-blue-600">
+                  {analytics?.totalRequested || 0}
+                </h2>
               </div>
-              <div>
-                <Send className="w-14 h-14 bg-blue-100 text-blue-600 rounded-md p-3" />
+
+              <div className="w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center">
+                <Send className="w-7 h-7 text-blue-600" />
               </div>
             </CardContent>
           </Card>
@@ -155,9 +178,7 @@ const PaymenTransfer = () => {
         {/* Table Section */}
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Transfer History
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900">Transfer History</h2>
             <div className="flex items-center gap-3">
               {status && (
                 <Button
@@ -172,35 +193,25 @@ const PaymenTransfer = () => {
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="bg-white text-gray-700"
-                  >
+                  <Button variant="outline" size="sm" className="bg-white text-gray-700">
                     <Filter className="w-4 h-4 mr-2" />
-                    Status: {status || "All"}
+                    Status: {status || 'All'}
                     <ChevronDown className="ml-2 w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleStatusChange("")}>
+                  <DropdownMenuItem onClick={() => handleStatusChange('')}>
                     All Transfers
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleStatusChange("transferred")}
-                  >
+                  <DropdownMenuItem onClick={() => handleStatusChange('transferred')}>
                     Transferred
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleStatusChange("pending")}
-                  >
+                  <DropdownMenuItem onClick={() => handleStatusChange('pending')}>
                     Pending
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleStatusChange("requested")}
-                  >
+                  <DropdownMenuItem onClick={() => handleStatusChange('requested')}>
                     Requested
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -208,31 +219,36 @@ const PaymenTransfer = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-gray-50/50">
-                  <TableRow>
-                    <TableHead className="font-semibold text-gray-700 whitespace-nowrap">
-                      Supplier
-                    </TableHead>
-                    <TableHead className="font-semibold text-gray-700 whitespace-nowrap">
-                      Brand Name
+                <TableHeader className="bg-gray-50">
+                  <TableRow className="border-b border-gray-200 hover:bg-transparent">
+                    <TableHead className="h-12 px-6 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">
+                      Order ID
                     </TableHead>
 
-                    <TableHead className="font-semibold text-gray-700 whitespace-nowrap">
+                    <TableHead className="h-12 px-6 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">
+                      Total Amount
+                    </TableHead>
+
+                    <TableHead className="h-12 px-6 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">
                       Admin Fee
                     </TableHead>
-                    <TableHead className="font-semibold text-gray-700 whitespace-nowrap">
+
+                    <TableHead className="h-12 px-6 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">
                       Payable Amount
                     </TableHead>
-                    <TableHead className="font-semibold text-gray-700 whitespace-nowrap text-center">
+
+                    <TableHead className="h-12 px-6 text-xs font-semibold tracking-wide text-gray-500 uppercase text-center whitespace-nowrap">
                       Transfer Status
                     </TableHead>
-                    <TableHead className="font-semibold text-gray-700 whitespace-nowrap text-center">
+
+                    <TableHead className="h-12 px-6 text-xs font-semibold tracking-wide text-gray-500 uppercase text-center whitespace-nowrap">
                       Order Status
                     </TableHead>
-                    <TableHead className="font-semibold text-gray-700 text-center whitespace-nowrap">
+
+                    <TableHead className="h-12 px-6 text-xs font-semibold tracking-wide text-gray-500 uppercase text-center whitespace-nowrap">
                       Action
                     </TableHead>
                   </TableRow>
@@ -242,102 +258,93 @@ const PaymenTransfer = () => {
                   {filteredSettlements?.map((settlement: Settlement) => (
                     <TableRow
                       key={settlement._id}
-                      className="bg-white hover:bg-gray-50 transition"
+                      className="border-b border-gray-100 hover:bg-gray-50/70 transition-colors"
                     >
-                      {/* 1. Supplier */}
-                      <TableCell className="whitespace-nowrap">
+                      {/* Order ID */}
+                      <TableCell className="px-6 py-5 whitespace-nowrap">
                         <div className="flex flex-col">
-                          <span className="font-medium text-gray-900">
-                            {settlement.supplierId?.shopName ||
-                              settlement.supplierId?.brandName}
+                          <span className="font-semibold text-gray-900">
+                            {settlement.orderId?.orderUniqueId}
                           </span>
-                          <span className="text-xs text-gray-500">
-                            {settlement.supplierId?.email}
-                          </span>
-                        </div>
-                      </TableCell>
 
-                      {/* 2. ShopName/Brand Name */}
-                      <TableCell className="whitespace-nowrap">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-gray-900">
-                            {settlement.supplierId?.brandName}
+                          <span className="text-xs text-gray-400 mt-1">
+                            #{settlement._id?.slice(-6)}
                           </span>
                         </div>
                       </TableCell>
 
-                      {/* 4. Amount */}
-                      <TableCell className="font-semibold text-gray-900 whitespace-nowrap">
-                        <div className="flex flex-col">
-                          <span>${settlement.adminCommission}</span>
-                          {/* <span className="text-[10px] text-gray-400">
-                            Total: ${settlement.adminCommission}
-                          </span> */}
-                        </div>
-                      </TableCell>
-                      {/* 4. Amount */}
-                      <TableCell className="font-semibold text-gray-900 whitespace-nowrap">
-                        <div className="flex flex-col">
-                          <span>${settlement.payableAmount}</span>
-                          {/* <span className="text-[10px] text-gray-400">
-                            Total: ${settlement.adminCommission}
-                          </span> */}
-                        </div>
+                      {/* Total Amount */}
+                      <TableCell className="px-6 py-5 whitespace-nowrap">
+                        <span className="font-semibold text-gray-900">
+                          ${settlement.totalAmount}
+                        </span>
                       </TableCell>
 
-                      {/* 5. Transfer Status */}
-                      <TableCell className="text-center">
+                      {/* Admin Commission */}
+                      <TableCell className="px-6 py-5 whitespace-nowrap">
+                        <span className="font-medium text-red-600">
+                          ${settlement.adminCommission}
+                        </span>
+                      </TableCell>
+
+                      {/* Payable Amount */}
+                      <TableCell className="px-6 py-5 whitespace-nowrap">
+                        <span className="font-semibold text-green-600">
+                          ${settlement.payableAmount}
+                        </span>
+                      </TableCell>
+
+                      {/* Transfer Status */}
+                      <TableCell className="px-6 py-5 text-center whitespace-nowrap">
                         <Badge
-                          className={`capitalize pointer-events-none whitespace-nowrap ${
-                            settlement.status === "transferred"
-                              ? "bg-green-100 text-green-700 border-green-200"
-                              : settlement.status === "pending"
-                                ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                                : "bg-blue-100 text-blue-700 border-blue-200"
+                          className={`capitalize rounded-full border px-3 py-1 text-xs font-medium ${
+                            settlement.status === 'transferred'
+                              ? 'bg-green-50 text-green-700 border-green-200'
+                              : settlement.status === 'pending'
+                                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                : 'bg-blue-50 text-blue-700 border-blue-200'
                           }`}
                         >
                           {settlement.status}
                         </Badge>
                       </TableCell>
 
-                      {/* 6. Order Status */}
-                      <TableCell className="text-center">
+                      {/* Order Status */}
+                      <TableCell className="px-6 py-5 text-center whitespace-nowrap">
                         <Badge
                           variant="outline"
-                          className="capitalize pointer-events-none font-normal whitespace-nowrap"
+                          className="capitalize rounded-full border-gray-300 bg-gray-50 text-gray-700 px-3 py-1 text-xs"
                         >
-                          {settlement.orderId?.paymentStatus}
+                          {settlement.orderId?.orderStatus}
                         </Badge>
                       </TableCell>
 
-                      {/* 7. Action */}
-                      {settlement.orderId.paymentStatus === "paid" ? (
-                        <TableCell className="text-center whitespace-nowrap">
-                          <span className="text-gray-500">N/A</span>
-                        </TableCell>
-                      ) : (
-                        <TableCell className="text-center whitespace-nowrap">
+                      {/* Action */}
+                      <TableCell className="px-6 py-5 text-center whitespace-nowrap">
+                        {settlement.orderId?.paymentStatus === 'paid' ? (
+                          <span className="text-sm text-gray-400 font-medium">Completed</span>
+                        ) : (
                           <Button
                             onClick={() => handleTransaction(settlement)}
                             size="sm"
-                            // variant="outline"
-                            className="h-8 bg-[#086646] text-white hover:bg-[#06543f]    "
+                            className="h-9 rounded-xl bg-[#086646] hover:bg-[#06543f] text-white px-4"
                           >
-                            {/* <DollarSign className="w-4 h-4 mr-2" /> */}
-                            Transaction Request Now
+                            Transaction Request
                           </Button>
-                        </TableCell>
-                      )}
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
+
                   {filteredSettlements.length === 0 && (
                     <TableRow>
-                      <td
-                        colSpan={7}
-                        className="py-12 text-center text-gray-500 font-medium"
-                      >
-                        No transfers found.
-                      </td>
+                      <TableCell colSpan={7} className="py-20 text-center text-gray-400">
+                        <div className="flex flex-col items-center gap-2">
+                          <XCircle className="w-10 h-10 text-gray-300" />
+
+                          <p className="text-sm font-medium">No transfer history found</p>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   )}
                 </TableBody>
@@ -345,48 +352,13 @@ const PaymenTransfer = () => {
             </div>
           </div>
 
-          {/* Pagination */}
-          {totalPage > 0 && (
-            <div className="flex items-center justify-center gap-2 mt-6">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-gray-600 hover:text-gray-900 bg-transparent"
-                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-              >
-                ←
-              </Button>
-              {Array.from({ length: totalPage }, (_, i) => i + 1).map(
-                (page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? "default" : "outline"}
-                    size="sm"
-                    className={
-                      currentPage === page
-                        ? "bg-teal-600 text-white hover:bg-teal-700"
-                        : "text-gray-600 bg-transparent"
-                    }
-                    onClick={() => handlePageChange(page)}
-                  >
-                    {page}
-                  </Button>
-                ),
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-gray-600 hover:text-gray-900 bg-transparent"
-                onClick={() =>
-                  handlePageChange(Math.min(totalPage, currentPage + 1))
-                }
-                disabled={currentPage === totalPage}
-              >
-                →
-              </Button>
-            </div>
-          )}
+          <PaginationPage
+            currentPage={currentPage}
+            totalPages={totalPage}
+            onPageChange={handlePageChange}
+            totalItems={settlements.length}
+            itemsPerPage={itemsPerPage}
+          />
         </div>
       </div>
     </main>
