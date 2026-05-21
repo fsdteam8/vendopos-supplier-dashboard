@@ -31,14 +31,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { useAllSettlements } from '@/hooks/usePaymentSettlement';
+import { useAllSettlements, useRequestForTransfer } from '@/hooks/usePaymentSettlement';
 import { Analytics, Settlement } from '@/types/paymentTransfer';
 import PaginationPage from '../ui/PaginationPage';
+import { toast } from 'sonner';
 
 const PaymenTransfer = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [status, setStatus] = useState<string>('');
 
+  const { mutate: requestTransfer, isPending } = useRequestForTransfer();
   const { data: settlementResponse, isLoading, isError } = useAllSettlements();
 
   // Normalize the API response to ensure `settlements` is always an array.
@@ -113,9 +115,25 @@ const PaymenTransfer = () => {
     ? settlements.filter((s: Settlement) => s.status.toLowerCase() === status.toLowerCase())
     : settlements;
 
-  const handleTransaction = (settlement: Settlement) => {
-    // Implement the logic to handle transaction details view
-    console.log('Transaction details for settlement:', settlement);
+  const handleRequestTransfer = (settlementId: string) => {
+    toast.loading('Requesting transfer payment...', {
+      id: 'transfer-request',
+    });
+
+    requestTransfer(settlementId, {
+      onSuccess: (data) => {
+        toast.success(data?.message || 'Transfer request submitted successfully', {
+          id: 'transfer-request',
+        });
+      },
+
+      onError: (err: any) => {
+        console.log(err);
+        toast.error(err?.response?.data?.message || 'Failed to request transfer payment', {
+          id: 'transfer-request',
+        });
+      },
+    });
   };
 
   return (
@@ -134,7 +152,7 @@ const PaymenTransfer = () => {
                 </h2>
               </div>
 
-              <div className="w-14 h-14 rounded-xl bg-green-50 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-xl bg-green-50 flextransferred items-center justify-center">
                 <CheckCircle className="w-7 h-7 text-green-600" />
               </div>
             </CardContent>
@@ -147,7 +165,7 @@ const PaymenTransfer = () => {
                 <p className="text-sm font-medium text-gray-500">Total Pending</p>
 
                 <h2 className="text-3xl font-bold text-amber-600">
-                  {analytics?.totalPending || 0}
+                  {analytics?.totalPending || 0}transferred
                 </h2>
               </div>
 
@@ -321,16 +339,27 @@ const PaymenTransfer = () => {
 
                       {/* Action */}
                       <TableCell className="px-6 py-5 text-center whitespace-nowrap">
-                        {settlement.orderId?.paymentStatus === 'paid' ? (
-                          <span className="text-sm text-gray-400 font-medium">Completed</span>
-                        ) : (
+                        {settlement.status === 'pending' && (
                           <Button
-                            onClick={() => handleTransaction(settlement)}
+                            onClick={() => handleRequestTransfer(settlement.paymentId)}
                             size="sm"
                             className="h-9 rounded-xl bg-[#086646] hover:bg-[#06543f] text-white px-4"
                           >
                             Transaction Request
                           </Button>
+                        )}
+
+                        {settlement.status === 'requested' && (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                            Request Sent
+                          </span>
+                        )}
+
+                        {(settlement.status === 'completed' ||
+                          settlement.status === 'transferred') && (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full bg-green-50 text-green-700 border border-green-200">
+                            Completed
+                          </span>
                         )}
                       </TableCell>
                     </TableRow>
