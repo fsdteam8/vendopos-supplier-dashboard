@@ -45,15 +45,6 @@ export interface Wholesale {
   label: string;
 }
 
-export interface OrderItem {
-  product: Product;
-  supplier: Supplier;
-  variant: string | null; // Assuming variant can be string or object, null in example
-  wholesale: Wholesale | null;
-  quantity: number;
-  unitPrice: number;
-}
-
 export interface Order {
   [x: string]: ReactNode;
   _id: string;
@@ -65,7 +56,7 @@ export interface Order {
   totalPrice: number;
   billingInfo: BillingInfo;
   purchaseDate: string;
-  items: OrderItem[];
+  items: any[]; // Use 'any' for items to match the provided example structure
   meta?: Meta;
 }
 
