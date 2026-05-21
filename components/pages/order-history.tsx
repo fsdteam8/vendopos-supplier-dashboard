@@ -23,7 +23,7 @@ export default function OrderHistory() {
   };
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value, page: 1 })); // Reset to page 1 on filter change
+    setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
   };
 
   return (

@@ -1,7 +1,7 @@
 'use client';
 
 import { X, Mail, Phone, MapPin, Package } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Order } from '@/app/features/order/types';
 import { format } from 'date-fns';
 import {
@@ -11,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useUpdateOrderStatus } from '../../app/features/order/hooks/useOrders';
+import { toast } from 'sonner';
 
 interface CustomerDetailsModalProps {
   customer: Order;
@@ -18,6 +20,10 @@ interface CustomerDetailsModalProps {
 }
 
 export function CustomerDetailsModal({ customer: order, onClose }: CustomerDetailsModalProps) {
+  const { mutate: updateOrderStatus } = useUpdateOrderStatus();
+
+  const [status, setStatus] = useState(order.orderStatus);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -38,6 +44,33 @@ export function CustomerDetailsModal({ customer: order, onClose }: CustomerDetai
     address: order.billingInfo
       ? `${order.billingInfo.address}, ${order.billingInfo.city}, ${order.billingInfo.country}`
       : null,
+  };
+
+  const handleStatusChange = (newStatus: string, itemId: string) => {
+    setStatus(newStatus);
+
+    toast.loading('Updating order status...', { id: 'order-status' });
+    updateOrderStatus(
+      {
+        orderId: order._id,
+        itemId,
+        status: newStatus,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Order status updated successfully', {
+            id: 'order-status',
+          });
+          console.log('Status updated successfully');
+        },
+        onError: (err: any) => {
+          toast.error('Failed to update order status', {
+            id: 'order-status',
+          });
+          console.error('Failed to update status', err);
+        },
+      },
+    );
   };
 
   return (
@@ -70,22 +103,32 @@ export function CustomerDetailsModal({ customer: order, onClose }: CustomerDetai
               <p className="text-sm text-gray-500">Order ID: {order.orderUniqueId}</p>
             </div>
 
-            {/* STATUS DROPDOWN (UNCHANGED FUNCTIONALITY) */}
-            <Select defaultValue={order.orderStatus}>
-              <SelectTrigger className="w-[160px] border-gray-200">
+            <Select
+              value={status}
+              onValueChange={(value) =>
+                status !== 'delivered' && handleStatusChange(value, order.items[0]?._id)
+              }
+              disabled={status === 'delivered'}
+            >
+              <SelectTrigger
+                className={`w-[160px] border-gray-200 ${
+                  status === 'delivered' ? 'opacity-60 cursor-not-allowed' : ''
+                }`}
+              >
                 <SelectValue />
               </SelectTrigger>
 
               <SelectContent>
                 <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="processing">Processing</SelectItem>
+                <SelectItem value="shipped">Shipped</SelectItem>
                 <SelectItem value="delivered">Delivered</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="ready_to_ship">Ready to Ship</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* CONTACT INFO (USING SMART RESOLVER) */}
+          {/* CONTACT INFO */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex gap-3">
               <Mail className="w-4 h-4 text-gray-400 mt-1" />
@@ -104,7 +147,7 @@ export function CustomerDetailsModal({ customer: order, onClose }: CustomerDetai
             </div>
           </div>
 
-          {/* ADDRESS (SMART FALLBACK) */}
+          {/* ADDRESS */}
           <div className="flex gap-3">
             <MapPin className="w-4 h-4 text-gray-400 mt-1" />
             <div>
@@ -132,8 +175,8 @@ export function CustomerDetailsModal({ customer: order, onClose }: CustomerDetai
                     {item.product?.images?.[0]?.url ? (
                       <img
                         src={item.product.images[0].url}
-                        alt="product"
                         className="w-12 h-12 rounded-lg object-cover border"
+                        alt="product"
                       />
                     ) : (
                       <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
