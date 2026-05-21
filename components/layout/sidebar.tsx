@@ -35,16 +35,25 @@ export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
   const userData = profile?.data;
 
   return (
-    <div className="w-64 h-screen bg-[#f5f7f9] flex flex-col justify-between">
-      {/* Top Section */}
+    <div className="w-64 h-screen bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] flex flex-col justify-between border-r border-gray-200">
       <div>
-        {/* Logo */}
-        <Link href="/" className="flex justify-center py-5">
+        <Link href="/" className="flex justify-center py-6">
           <Image src="/logo.svg" alt="Logo" width={70} height={70} />
         </Link>
 
-        {/* Menu */}
-        <nav className="px-4 py-6 space-y-2">
+        {/* WELCOME TEXT */}
+        <div className="px-5 mb-5">
+          <p className="text-sm text-gray-500 flex items-center gap-1">
+            Welcome back <span className="animate-pulse">👋</span>
+          </p>
+
+          <p className="text-lg font-semibold text-gray-900 mt-1 tracking-tight">
+            Supplier Dashboard
+          </p>
+        </div>
+
+        {/* MENU */}
+        <nav className="px-3 py-2 space-y-6">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
@@ -54,9 +63,9 @@ export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
                 key={item.id}
                 onClick={() => setCurrentPage(item.id)}
                 className={cn(
-                  'w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-all cursor-pointer',
+                  'w-full flex items-center gap-3 px-4 py-2.5 rounded-sm text-md font-semibold transition-all duration-200 cursor-pointer',
                   isActive
-                    ? 'bg-[#09714e] text-white shadow-sm'
+                    ? 'bg-[#09714e] text-white shadow-md'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-[#09714e]',
                 )}
               >
@@ -68,11 +77,11 @@ export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
         </nav>
       </div>
 
-      {/* Bottom Section (Profile) */}
-      <div className="p-4 border-t">
+      {/* BOTTOM PROFILE */}
+      <div className="p-4 border-t border-gray-200 bg-white/60 backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          {/* Avatar */}
-          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-sm font-semibold">
+          {/* AVATAR */}
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#09714e] to-[#0aa06e] flex items-center justify-center overflow-hidden text-sm font-semibold text-white shadow-sm">
             {userData?.image?.url ? (
               <img src={userData.image.url} alt="Profile" className="w-full h-full object-cover" />
             ) : (
@@ -80,7 +89,7 @@ export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
             )}
           </div>
 
-          {/* User Info */}
+          {/* USER INFO */}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-800 truncate">
               {userData?.firstName || userData?.lastName
@@ -91,9 +100,12 @@ export function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
             <p className="text-xs text-gray-500 capitalize">{userData?.role || 'Member'}</p>
           </div>
 
-          {/* Logout */}
-          <button onClick={() => signOut()} className="p-2 rounded-lg hover:bg-red-100 transition">
-            <LogOut className="w-5 h-5 text-red-500 cursor-pointer" />
+          {/* LOGOUT */}
+          <button
+            onClick={() => signOut()}
+            className="p-2 rounded-lg hover:bg-red-50 transition group"
+          >
+            <LogOut className="w-5 h-5 text-red-500 group-hover:text-red-600" />
           </button>
         </div>
       </div>
