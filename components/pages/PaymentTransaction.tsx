@@ -1,9 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -12,37 +19,29 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  ChevronDown,
-  Loader2,
-  Filter,
-  RotateCcw,
-  DollarSign,
-  CheckCircle,
-  Clock,
-  XCircle,
-  Send,
-} from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { useAllSettlements } from '@/hooks/usePaymentSettlement';
+import { useAllSettlements, useRequestForTransfer } from '@/hooks/usePaymentSettlement';
 import { Analytics, Settlement } from '@/types/paymentTransfer';
+import {
+  CheckCircle,
+  ChevronDown,
+  Clock,
+  Filter,
+  Loader2,
+  RotateCcw,
+  Send,
+  XCircle,
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import PaginationPage from '../ui/PaginationPage';
 
 const PaymenTransfer = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [status, setStatus] = useState<string>('');
 
+  const { mutate: requestTransfer, isPending } = useRequestForTransfer();
   const { data: settlementResponse, isLoading, isError } = useAllSettlements();
 
-  // Normalize the API response to ensure `settlements` is always an array.
-  // Some endpoints return `{ data: [...] }`, others return `[...]` or `{ docs: [...] }`.
   const settlementsRaw = settlementResponse?.data ?? settlementResponse;
   const settlements: Settlement[] = Array.isArray(settlementsRaw)
     ? settlementsRaw
@@ -52,10 +51,19 @@ const PaymenTransfer = () => {
         ? settlementsRaw.docs
         : [];
 
-  const analytics: Analytics | undefined = settlementResponse?.analytics;
-  console.log('settlements', settlementsRaw);
+  const analyticsCandidateList = [
+    settlementResponse?.data?.analytics,
+    settlementResponse?.analytics,
+    settlementResponse?.data?.data?.analytics,
+    settlementResponse?.data?.meta?.analytics,
+    settlementResponse?.meta?.analytics,
+  ];
 
-  const meta = settlementResponse?.meta;
+  const analytics: Analytics | undefined = analyticsCandidateList.find((a) => !!a) as
+    | Analytics
+    | undefined;
+
+  const meta = settlementResponse?.data?.meta ?? settlementResponse?.meta;
   const totalPage = meta?.totalPages || 1;
   const itemsPerPage = 10;
 
@@ -113,9 +121,25 @@ const PaymenTransfer = () => {
     ? settlements.filter((s: Settlement) => s.status.toLowerCase() === status.toLowerCase())
     : settlements;
 
-  const handleTransaction = (settlement: Settlement) => {
-    // Implement the logic to handle transaction details view
-    console.log('Transaction details for settlement:', settlement);
+  const handleRequestTransfer = (settlementId: string) => {
+    toast.loading('Requesting transfer payment...', {
+      id: 'transfer-request',
+    });
+
+    requestTransfer(settlementId, {
+      onSuccess: (data) => {
+        toast.success(data?.message || 'Transfer request submitted successfully', {
+          id: 'transfer-request',
+        });
+      },
+
+      onError: (err: any) => {
+        console.log(err);
+        toast.error(err?.response?.data?.message || 'Failed to request transfer payment', {
+          id: 'transfer-request',
+        });
+      },
+    });
   };
 
   return (
@@ -134,7 +158,7 @@ const PaymenTransfer = () => {
                 </h2>
               </div>
 
-              <div className="w-14 h-14 rounded-xl bg-green-50 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-xl bg-green-50 flex transferred items-center justify-center">
                 <CheckCircle className="w-7 h-7 text-green-600" />
               </div>
             </CardContent>
@@ -321,16 +345,27 @@ const PaymenTransfer = () => {
 
                       {/* Action */}
                       <TableCell className="px-6 py-5 text-center whitespace-nowrap">
-                        {settlement.orderId?.paymentStatus === 'paid' ? (
-                          <span className="text-sm text-gray-400 font-medium">Completed</span>
-                        ) : (
+                        {settlement.status === 'pending' && (
                           <Button
-                            onClick={() => handleTransaction(settlement)}
+                            onClick={() => handleRequestTransfer(settlement.paymentId)}
                             size="sm"
                             className="h-9 rounded-xl bg-[#086646] hover:bg-[#06543f] text-white px-4"
                           >
                             Transaction Request
                           </Button>
+                        )}
+
+                        {settlement.status === 'requested' && (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                            Request Sent
+                          </span>
+                        )}
+
+                        {(settlement.status === 'completed' ||
+                          settlement.status === 'transferred') && (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full bg-green-50 text-green-700 border border-green-200">
+                            Completed
+                          </span>
                         )}
                       </TableCell>
                     </TableRow>
