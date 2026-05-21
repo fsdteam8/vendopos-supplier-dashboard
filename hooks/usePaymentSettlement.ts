@@ -1,5 +1,5 @@
 import { getPaymentSettlement, requestForTransfer } from '@/lib/api/paymentSttlement';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const useAllSettlements = () => {
   return useQuery({
@@ -9,7 +9,11 @@ export const useAllSettlements = () => {
 };
 
 export const useRequestForTransfer = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (settlementId: string) => requestForTransfer(settlementId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-settlements'] });
+    },
   });
 };
