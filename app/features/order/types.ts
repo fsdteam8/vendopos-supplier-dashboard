@@ -55,6 +55,7 @@ export interface OrderItem {
 }
 
 export interface Order {
+  [x: string]: ReactNode;
   _id: string;
   user: User;
   orderType: string;
