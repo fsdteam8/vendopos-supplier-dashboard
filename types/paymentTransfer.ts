@@ -1,4 +1,5 @@
 export interface OrderInfo {
+  [x: string]: ReactNode;
   _id: string;
   paymentStatus: string;
   orderStatus: string;
