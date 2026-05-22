@@ -34,6 +34,7 @@ import {
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import PaginationPage from '../ui/PaginationPage';
+import { cn } from '../../lib/utils';
 
 const PaymenTransfer = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -337,7 +338,19 @@ const PaymenTransfer = () => {
                       <TableCell className="px-6 py-5 text-center whitespace-nowrap">
                         <Badge
                           variant="outline"
-                          className="capitalize rounded-full border-gray-300 bg-gray-50 text-gray-700 px-3 py-1 text-xs"
+                          className={cn(
+                            'capitalize rounded-full px-3 py-1 text-xs border',
+                            settlement.orderId?.orderStatus === 'delivered' &&
+                              'border-green-300 bg-green-50 text-green-800',
+                            settlement.orderId?.orderStatus === 'pending' &&
+                              'border-yellow-200 bg-yellow-50 text-yellow-700',
+                            settlement.orderId?.orderStatus === 'cancelled' &&
+                              'border-red-200 bg-red-50 text-red-700',
+                            settlement.orderId?.orderStatus !== 'delivered' &&
+                              settlement.orderId?.orderStatus !== 'pending' &&
+                              settlement.orderId?.orderStatus !== 'cancelled' &&
+                              'border-gray-300 bg-gray-50 text-gray-700',
+                          )}
                         >
                           {settlement.orderId?.orderStatus}
                         </Badge>
