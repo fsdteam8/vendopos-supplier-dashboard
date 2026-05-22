@@ -62,7 +62,6 @@ export const useRefreshOnboarding = () => {
           title: 'Success',
           description: 'Status refreshed successfully',
         });
-        window.location.reload();
       } else {
         toast({
           title: 'Error',
