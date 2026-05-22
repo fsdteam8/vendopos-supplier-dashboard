@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useProducts } from "@/app/features/products/hooks/useProducts";
-import { Product } from "@/app/features/products/types";
-import { useProfile } from "@/app/features/profile/hooks/useProfile";
-import { AddProductModal } from "@/components/ui/add-product-modal";
-import { Button } from "@/components/ui/button";
+import { useProducts } from '@/app/features/products/hooks/useProducts';
+import { Product } from '@/app/features/products/types';
+import { useProfile } from '@/app/features/profile/hooks/useProfile';
+import { AddProductModal } from '@/components/ui/add-product-modal';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,12 +12,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { ProductTable } from "@/components/ui/product-table";
-import { StatCard } from "@/components/ui/stat-card";
-import { Box, Plus, TrendingUp } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+} from '@/components/ui/dialog';
+import { ProductTable } from '@/components/ui/product-table';
+import { StatCard } from '@/components/ui/stat-card';
+import { Box, Plus, TrendingUp } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
 
 export default function Products() {
   const [params, setParams] = useState({
@@ -47,25 +47,25 @@ export default function Products() {
   };
 
   const handleSetupPayment = () => {
-    router.push("/?page=payments");
+    router.push('/?page=payments');
     setOnboarding(false);
   };
 
   const stats = useMemo(
     () => [
       {
-        label: "Total Products",
-        value: `${analyticsData?.totalProducts || "0"}`,
+        label: 'Total Products',
+        value: `${analyticsData?.totalProducts || '0'}`,
         icon: Box,
-        bgColor: "bg-purple-50",
-        iconColor: "text-purple-600",
+        bgColor: 'bg-purple-50',
+        iconColor: 'text-purple-600',
       },
       {
-        label: "Total Orders",
-        value: `${analyticsData?.totalOrder || "0"} units`,
+        label: 'Total Orders',
+        value: `${analyticsData?.totalOrder || '0'} units`,
         icon: TrendingUp,
-        bgColor: "bg-orange-50",
-        iconColor: "text-orange-600",
+        bgColor: 'bg-orange-50',
+        iconColor: 'text-orange-600',
       },
     ],
     [analyticsData],
@@ -76,9 +76,7 @@ export default function Products() {
       <div className="flex items-start justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-          <p className="text-gray-600 mt-1">
-            Manage and add new products to your inventory
-          </p>
+          <p className="text-gray-600 mt-1">Manage and add new products to your inventory</p>
         </div>
         <button
           onClick={handleStripeOnboarding}
@@ -97,7 +95,7 @@ export default function Products() {
         ))}
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg overflow-hidden">
         <ProductTable
           products={products}
           isLoading={isLoading}
@@ -114,20 +112,29 @@ export default function Products() {
       </div>
 
       <Dialog open={onboarding} onOpenChange={setOnboarding}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md rounded-xl">
           <DialogHeader>
-            <DialogTitle>Payments & Transactions Required</DialogTitle>
-            <DialogDescription>
-              You need to complete your Stripe onboarding before adding
-              products.
+            <DialogTitle className="text-lg font-semibold text-gray-900">
+              Complete Payment Setup
+            </DialogTitle>
+
+            <DialogDescription className="text-sm text-gray-600 leading-relaxed">
+              To start adding and selling products, you need to complete your Stripe onboarding.
+              This ensures your account is verified and ready to receive payouts securely.
             </DialogDescription>
           </DialogHeader>
+
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-600">
+            Once completed, you will be able to receive payments, manage payouts, and track
+            transactions in real time.
+          </div>
+
           <DialogFooter>
             <Button
-              className="bg-[#1B7D6E] cursor-pointer hover:bg-[#155D5C] text-white"
+              className="w-full bg-[#1B7D6E] hover:bg-[#155D5C] text-white cursor-pointer"
               onClick={handleSetupPayment}
             >
-              SetUp Payment
+              Complete Stripe Setup
             </Button>
           </DialogFooter>
         </DialogContent>
