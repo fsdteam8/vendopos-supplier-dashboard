@@ -4,7 +4,6 @@ import { onboardService } from '@/app/features/onboarding/api';
 import { useGetStripeLink, useOnboarding } from '@/app/features/onboarding/hooks/use-onboarding';
 import { useProfile } from '@/app/features/profile/hooks/useProfile';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -13,20 +12,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { StatCard } from '@/components/ui/stat-card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { cn } from '@/lib/utils';
-import { ArrowUpRight, Clock, CreditCard, DollarSign, ExternalLink, Loader2 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { ExternalLink, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast as sonnerToast } from 'sonner';
 import { Button } from '../ui/button';
+import PaymenTransfer from './PaymentTransaction';
 
 type PollingHandlerProps = {
   shouldPoll: boolean;
@@ -81,54 +71,6 @@ function PollingHandler({ shouldPoll, onReady, onError, setForceClose }: Polling
   return null;
 }
 
-const mockTransactions = [
-  {
-    id: 'TX-001',
-    date: '2024-01-20',
-    amount: '$1,200.00',
-    status: 'completed',
-    type: 'credit',
-    method: 'Bank Transfer',
-    description: 'Payout for Order #ORD-8822',
-  },
-  {
-    id: 'TX-002',
-    date: '2024-01-18',
-    amount: '$450.00',
-    status: 'pending',
-    type: 'credit',
-    method: 'Stripe',
-    description: 'Payment for Order #ORD-8823',
-  },
-  {
-    id: 'TX-003',
-    date: '2024-01-15',
-    amount: '$3,500.00',
-    status: 'completed',
-    type: 'credit',
-    method: 'Bank Transfer',
-    description: 'Monthly Payout - December',
-  },
-  {
-    id: 'TX-004',
-    date: '2024-01-10',
-    amount: '$89.00',
-    status: 'failed',
-    type: 'debit',
-    method: 'Credit Card',
-    description: 'Subscription Fee - Premium Plan',
-  },
-  {
-    id: 'TX-005',
-    date: '2024-01-05',
-    amount: '$220.00',
-    status: 'completed',
-    type: 'credit',
-    method: 'PayPal',
-    description: 'Refund Adjustment',
-  },
-];
-
 export default function Payments() {
   const { mutate: createOnboarding, isPending: isCreating } = useOnboarding();
   const { mutate: getStripeLink, isPending: isGettingLink } = useGetStripeLink();
@@ -143,60 +85,10 @@ export default function Payments() {
   const [onboardingErrorMessage, setOnboardingErrorMessage] = useState<string | null>(null);
 
   const { data: profile } = useProfile();
-
   const profileData = profile?.data;
 
   const stripeAccountId = profileData?.stripeAccountId;
   const isOnboarded = profileData?.stripeOnboardingCompleted;
-
-  const stats = useMemo(
-    () => [
-      {
-        label: 'Total Balance',
-        value: '$12,450.00',
-        icon: DollarSign,
-        bgColor: 'bg-blue-50',
-        iconColor: 'text-blue-600',
-      },
-      {
-        label: 'Pending Payouts',
-        value: '$1,840.50',
-        icon: Clock,
-        bgColor: 'bg-orange-50',
-        iconColor: 'text-orange-600',
-      },
-      {
-        label: 'Successful Transactions',
-        value: '48',
-        icon: ArrowUpRight,
-        bgColor: 'bg-emerald-50',
-        iconColor: 'text-emerald-600',
-      },
-      {
-        label: 'Active Plan',
-        value: 'Pro Vendor',
-        icon: CreditCard,
-        bgColor: 'bg-purple-50',
-        iconColor: 'text-purple-600',
-      },
-    ],
-    [],
-  );
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return (
-          <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Completed</Badge>
-        );
-      case 'pending':
-        return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">Pending</Badge>;
-      case 'failed':
-        return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Failed</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
 
   // STRIPE STATES
   const noStripeAccount = !stripeAccountId;
@@ -212,7 +104,7 @@ export default function Payments() {
   }, [stripeAccountId, onboardingErrorMessage, needsOnboarding, canAccessDashboard]);
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-8 bg-[#f9fafb]">
       {/* HEADER */}
       <div className="flex justify-between items-center">
         <div>
@@ -261,58 +153,8 @@ export default function Payments() {
         )}
       </div>
 
-      {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
-          <StatCard key={stat.label} {...stat} />
-        ))}
-      </div>
+      <PaymenTransfer />
 
-      {/* TRANSACTIONS */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">Recent Transactions</h2>
-          <button className="text-sm font-medium text-primary hover:underline">Download CSV</button>
-        </div>
-
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Transaction ID</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Method</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {mockTransactions.map((tx) => (
-              <TableRow key={tx.id}>
-                <TableCell className="font-medium text-gray-900">{tx.id}</TableCell>
-                <TableCell className="text-gray-600">{tx.date}</TableCell>
-                <TableCell className="text-gray-600 max-w-xs truncate">{tx.description}</TableCell>
-                <TableCell className="text-gray-600">{tx.method}</TableCell>
-                <TableCell>
-                  <span
-                    className={cn(
-                      'font-semibold',
-                      tx.type === 'credit' ? 'text-emerald-600' : 'text-red-600',
-                    )}
-                  >
-                    {tx.type === 'credit' ? '+' : '-'}
-                    {tx.amount}
-                  </span>
-                </TableCell>
-                <TableCell>{getStatusBadge(tx.status)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Persistent onboarding alert shown when server returns the 500 'not completed' error */}
       {onboardingErrorMessage && (
         <Alert variant="destructive" className="mb-4">
           <AlertTitle>Please complete onboarding</AlertTitle>
@@ -337,7 +179,6 @@ export default function Payments() {
       <Dialog
         open={!forceCloseModal && (needsOnboarding || canAccessDashboard)}
         onOpenChange={(isOpen) => {
-          // When user tries to close via X button or ESC, update state
           if (!isOpen) {
             setForceCloseModal(true);
           }
@@ -399,18 +240,12 @@ export default function Payments() {
                       setPollingState({ loading: true, error: null });
                       const res = await onboardService.getStripeLink();
 
-                      // Log full response for debugging
-                      console.log('[Verify Now] Full API response:', res);
-
                       // Success path: open url if returned
                       if (res?.success && res?.data?.url) {
-                        console.log('[Verify Now] Success - opening URL:', res.data.url);
                         window.open(res.data.url, '_blank');
                         setPollingState({ loading: false, ready: false, error: null });
                         sonnerToast.success(res.message || 'Opened onboarding link');
                       } else if (res?.success === false && res?.statusCode === 500) {
-                        // Specific StripeInvalidRequestError path from server when login link cannot be created
-                        console.log('[Verify Now] 500 Error detected:', res);
                         setPollingState({ loading: false, error: 'stripe_invalid', ready: false });
                         // Prefer detailed error from errorSource if present
                         const errorSourceMsg =
@@ -422,16 +257,12 @@ export default function Payments() {
                           errorSourceMsg ||
                           res?.message ||
                           'Cannot create a login link for an account that has not completed onboarding.';
-
-                        console.log('[Verify Now] User message:', userMsg);
-
                         // Close the modal and show a persistent in-page alert so user can restart onboarding
                         setForceCloseModal(true);
                         setOnboardingErrorMessage(userMsg);
                         // Also show a toast
                         sonnerToast.error(userMsg);
                       } else {
-                        console.log('[Verify Now] Unknown response shape:', res);
                         setPollingState({
                           loading: false,
                           error: res?.message || 'unknown',
@@ -440,8 +271,6 @@ export default function Payments() {
                         sonnerToast.error(res?.message || 'Unknown response');
                       }
                     } catch (err: any) {
-                      console.log('[Verify Now] Catch error:', err);
-                      console.log('[Verify Now] Error response:', err?.response?.data);
                       setPollingState({
                         loading: false,
                         error: err?.response?.data?.message || err?.message || 'Failed',
