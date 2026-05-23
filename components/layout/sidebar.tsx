@@ -26,7 +26,6 @@ const menuItems = [
   { id: 'products', label: 'Products', icon: Package },
   { id: 'orders', label: 'Order History', icon: ShoppingCart },
   { id: 'payments', label: 'Payments', icon: CreditCard },
-  { id: 'PaymentSettlement', label: 'Settlements', icon: CreditCard },
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'notifications', label: 'Notifications', icon: Bell },
 ];
