@@ -1,11 +1,7 @@
 'use client';
 
 import { onboardService } from '@/app/features/onboarding/api';
-import {
-  useGetStripeLink,
-  useOnboarding,
-  useRefreshOnboarding,
-} from '@/app/features/onboarding/hooks/use-onboarding';
+import { useGetStripeLink, useOnboarding } from '@/app/features/onboarding/hooks/use-onboarding';
 import { useProfile } from '@/app/features/profile/hooks/useProfile';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -67,7 +63,6 @@ function PollingHandler({ shouldPoll, onReady, onError, setForceClose }: Polling
           }
         }
       } catch (err: any) {
-        // For network or server errors, surface a readable message
         const msg = err?.response?.data?.message || err?.message || 'Failed to poll';
         onError(msg);
       }
