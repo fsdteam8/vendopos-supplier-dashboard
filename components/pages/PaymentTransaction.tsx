@@ -44,6 +44,7 @@ const PaymenTransfer = () => {
   const { data: settlementResponse, isLoading, isError } = useAllSettlements();
 
   const settlementsRaw = settlementResponse?.data ?? settlementResponse;
+
   const settlements: Settlement[] = Array.isArray(settlementsRaw)
     ? settlementsRaw
     : Array.isArray(settlementsRaw?.data)
