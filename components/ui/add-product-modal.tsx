@@ -9,8 +9,14 @@ import {
   CreateProductFormValues,
   createProductSchema,
 } from "@/app/features/products/schema";
-import { Product } from "@/app/features/products/types";
+import {
+  getProductNamesForType,
+  getProductTypeOptions,
+  getRegionCategory,
+} from "@/app/features/products/category-selection";
+import { Product, ProductImage } from "@/app/features/products/types";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { Loader2, Plus, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -31,7 +37,7 @@ export function AddProductModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
-  const [existingImages, setExistingImages] = useState<any[]>(
+  const [existingImages, setExistingImages] = useState<ProductImage[]>(
     product?.images || [],
   );
 
@@ -74,8 +80,8 @@ export function AddProductModal({
         description: product.description || "",
         shortDescription: product.shortDescription || "",
         categoryId:
-          typeof product.categoryId === "object"
-            ? (product.categoryId as any)._id
+          product.categoryId && typeof product.categoryId === "object"
+            ? product.categoryId._id
             : product.categoryId || "",
         productType: product.productType || "",
         originCountry: product.originCountry || "",
@@ -98,20 +104,44 @@ export function AddProductModal({
     }
   }, [product, reset]);
 
-  // Watch region and productType
+  // A region owns its product types, countries, and sub-categories.
   const selectedRegion = watch("categoryId");
   const selectedProductType = watch("productType");
 
   const params = useMemo(
     () => ({
       region: selectedRegion || undefined,
-      productType: selectedProductType || undefined,
     }),
-    [selectedRegion, selectedProductType],
+    [selectedRegion],
   );
 
-  const { data: categoriesData } = useAllCategories(params);
+  const { data: categoriesData, isFetching: isCategoriesFetching } =
+    useAllCategories(params);
   const { data: allRegion } = useGetAllRegions();
+
+  const selectedCategory = useMemo(
+    () => getRegionCategory(categoriesData?.data, selectedRegion),
+    [categoriesData?.data, selectedRegion],
+  );
+  const productTypes = getProductTypeOptions(selectedCategory);
+  const productNames = getProductNamesForType(
+    selectedCategory,
+    selectedProductType,
+  );
+  const countries = selectedCategory?.country ?? [];
+
+  const categoryIdField = register("categoryId", {
+    onChange: () => {
+      setValue("productType", "");
+      setValue("productName", "");
+      setValue("originCountry", "");
+    },
+  });
+  const productTypeField = register("productType", {
+    onChange: () => {
+      setValue("productName", "");
+    },
+  });
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -133,7 +163,6 @@ export function AddProductModal({
     if (e.target.files) {
       const files = Array.from(e.target.files);
       setImageFiles((prev) => [...prev, ...files]);
-      setValue("images", [...imageFiles, ...files]);
       const newPreviews = files.map((file) => URL.createObjectURL(file));
       setNewImagePreviews((prev) => [...prev, ...newPreviews]);
     }
@@ -202,7 +231,14 @@ export function AddProductModal({
       }
     } catch (error) {
       console.error("Submission error:", error);
-      toast.error("An error occurred. Please check your inputs.");
+      const responseMessage = axios.isAxiosError<{ message?: unknown }>(error)
+        ? error.response?.data?.message
+        : undefined;
+      toast.error(
+        typeof responseMessage === "string"
+          ? responseMessage
+          : "Unable to save the product. Please try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -262,17 +298,23 @@ export function AddProductModal({
                 </label>
 
                 <select
-                  {...register("categoryId")}
+                  {...categoryIdField}
+                  aria-invalid={Boolean(errors.categoryId)}
                   className="w-full h-11 px-4 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition"
                 >
                   <option value="">Select Region</option>
 
-                  {allRegion?.data?.map((item: any) => (
+                  {allRegion?.data?.map((item) => (
                     <option key={item._id} value={item._id}>
                       {item.region.trim()}
                     </option>
                   ))}
                 </select>
+                {errors.categoryId && (
+                  <p className="mt-1 text-xs text-red-500" role="alert">
+                    {errors.categoryId.message}
+                  </p>
+                )}
               </div>
 
               {/* Category */}
@@ -282,27 +324,24 @@ export function AddProductModal({
                 </label>
 
                 <select
-                  {...register("productType")}
-                  disabled={!categoriesData?.filters?.productTypes?.length}
+                  {...productTypeField}
+                  disabled={!selectedRegion || productTypes.length === 0}
+                  aria-invalid={Boolean(errors.productType)}
                   className="w-full h-11 px-4 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition disabled:bg-gray-100"
                 >
                   <option value="">Select Category</option>
 
-                  {categoriesData?.filters?.productTypes?.map(
-                    (type: string) => {
-                      const category =
-                        categoriesData?.data?.[0]?.categories?.find(
-                          (c: any) => c.productType === type,
-                        );
-
-                      return (
-                        <option key={category?._id} value={category?._id}>
-                          {type}
-                        </option>
-                      );
-                    },
-                  )}
+                  {productTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
                 </select>
+                {errors.productType && (
+                  <p className="mt-1 text-xs text-red-500" role="alert">
+                    {errors.productType.message}
+                  </p>
+                )}
               </div>
 
               {/* ================= PRODUCT NAMES ================= */}
@@ -312,18 +351,22 @@ export function AddProductModal({
                 </label>
                 <select
                   {...register("productName")}
-                  disabled={!categoriesData?.filters?.productNames?.length}
+                  disabled={!selectedProductType || productNames.length === 0}
+                  aria-invalid={Boolean(errors.productName)}
                   className="w-full h-11 px-4 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition disabled:bg-gray-100"
                 >
                   <option value="">Select Sub-Category</option>
-                  {categoriesData?.filters?.productNames?.map(
-                    (name: string) => (
-                      <option key={name} value={name}>
-                        {name}
-                      </option>
-                    ),
-                  )}
+                  {productNames.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
                 </select>
+                {errors.productName && (
+                  <p className="mt-1 text-xs text-red-500" role="alert">
+                    {errors.productName.message}
+                  </p>
+                )}
               </div>
 
               {/* =========================== Country */}
@@ -331,18 +374,48 @@ export function AddProductModal({
                 <label className="block text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">
                   Select Country
                 </label>
-                <select
-                  {...register("originCountry")}
-                  disabled={!categoriesData?.data?.[0]?.country?.length}
-                  className="w-full h-11 px-4 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition disabled:bg-gray-100"
-                >
-                  <option value="">Select Country</option>
-                  {categoriesData?.data?.[0]?.country?.map((name: string) => (
-                    <option key={name} value={name}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
+                {countries.length > 0 ? (
+                  <select
+                    {...register("originCountry")}
+                    disabled={!selectedRegion}
+                    aria-invalid={Boolean(errors.originCountry)}
+                    className="w-full h-11 px-4 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition disabled:bg-gray-100"
+                  >
+                    <option value="">Select Country</option>
+                    {countries.map((name) => (
+                      <option key={name} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    {...register("originCountry")}
+                    disabled={!selectedRegion || isCategoriesFetching}
+                    aria-invalid={Boolean(errors.originCountry)}
+                    placeholder={
+                      isCategoriesFetching
+                        ? "Loading countries..."
+                        : selectedRegion
+                        ? "Enter country"
+                        : "Select a region first"
+                    }
+                    className="w-full h-11 px-4 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition disabled:bg-gray-100"
+                  />
+                )}
+                {selectedRegion &&
+                  !isCategoriesFetching &&
+                  countries.length === 0 && (
+                    <p className="mt-1 text-xs text-gray-500" role="status">
+                      No countries are configured for this region. Enter the
+                      product&apos;s country of origin.
+                    </p>
+                  )}
+                {errors.originCountry && (
+                  <p className="mt-1 text-xs text-red-500" role="alert">
+                    {errors.originCountry.message}
+                  </p>
+                )}
               </div>
 
               {/* Shelf Life */}
@@ -352,9 +425,15 @@ export function AddProductModal({
                 </label>
                 <input
                   {...register("shelfLife")}
+                  aria-invalid={Boolean(errors.shelfLife)}
                   placeholder="e.g. 7 days"
                   className="w-full h-11 px-4 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition"
                 />
+                {errors.shelfLife && (
+                  <p className="mt-1 text-xs text-red-500" role="alert">
+                    {errors.shelfLife.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -370,8 +449,14 @@ export function AddProductModal({
               </label>
               <input
                 {...register("shortDescription")}
+                aria-invalid={Boolean(errors.shortDescription)}
                 className="w-full h-11 px-4 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition"
               />
+              {errors.shortDescription && (
+                <p className="mt-1 text-xs text-red-500" role="alert">
+                  {errors.shortDescription.message}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wide text-gray-600 mb-2">
@@ -379,9 +464,15 @@ export function AddProductModal({
               </label>
               <textarea
                 {...register("description")}
+                aria-invalid={Boolean(errors.description)}
                 rows={4}
                 className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition"
               />
+              {errors.description && (
+                <p className="mt-1 text-xs text-red-500" role="alert">
+                  {errors.description.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -516,9 +607,15 @@ export function AddProductModal({
                   </label>
                   <input
                     {...register(`variants.${index}.label`)}
+                    aria-invalid={Boolean(errors.variants?.[index]?.label)}
                     placeholder="e.g. 1kg Pack"
                     className="w-full h-11 px-3 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition"
                   />
+                  {errors.variants?.[index]?.label && (
+                    <p className="mt-1 text-xs text-red-500" role="alert">
+                      {errors.variants[index]?.label?.message}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-500 mb-1 block">
@@ -528,8 +625,14 @@ export function AddProductModal({
                     type="number"
                     step="0.01"
                     {...register(`variants.${index}.price`)}
+                    aria-invalid={Boolean(errors.variants?.[index]?.price)}
                     className="w-full h-11 px-3 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition"
                   />
+                  {errors.variants?.[index]?.price && (
+                    <p className="mt-1 text-xs text-red-500" role="alert">
+                      {errors.variants[index]?.price?.message}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-500 mb-1 block">
@@ -538,8 +641,14 @@ export function AddProductModal({
                   <input
                     type="number"
                     {...register(`variants.${index}.stock`)}
+                    aria-invalid={Boolean(errors.variants?.[index]?.stock)}
                     className="w-full h-11 px-3 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition"
                   />
+                  {errors.variants?.[index]?.stock && (
+                    <p className="mt-1 text-xs text-red-500" role="alert">
+                      {errors.variants[index]?.stock?.message}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-500 mb-1 block">
@@ -547,9 +656,15 @@ export function AddProductModal({
                   </label>
                   <input
                     {...register(`variants.${index}.unit`)}
+                    aria-invalid={Boolean(errors.variants?.[index]?.unit)}
                     placeholder="kg, Liter, g, etc"
                     className="w-full h-11 px-3 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition"
                   />
+                  {errors.variants?.[index]?.unit && (
+                    <p className="mt-1 text-xs text-red-500" role="alert">
+                      {errors.variants[index]?.unit?.message}
+                    </p>
+                  )}
                 </div>
                 <div className="relative">
                   <label className="text-xs font-medium text-gray-500 mb-1 block">
@@ -558,8 +673,14 @@ export function AddProductModal({
                   <input
                     type="number"
                     {...register(`variants.${index}.discount`)}
+                    aria-invalid={Boolean(errors.variants?.[index]?.discount)}
                     className="w-full h-11 px-3 rounded-lg border border-gray-200 focus:border-[#1B7D6E] focus:ring-2 focus:ring-[#1B7D6E]/10 transition"
                   />
+                  {errors.variants?.[index]?.discount && (
+                    <p className="mt-1 text-xs text-red-500" role="alert">
+                      {errors.variants[index]?.discount?.message}
+                    </p>
+                  )}
                   {fields.length > 1 && (
                     <button
                       type="button"

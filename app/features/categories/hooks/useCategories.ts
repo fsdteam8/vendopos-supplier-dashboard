@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAllCategories, getAllRegions } from "../api";
-import { CategoryParams, CategoryResponse } from "../types";
+import {
+  CategoryParams,
+  CategoryResponse,
+  GetRegionsResponse,
+} from "../types";
 
 export const useAllCategories = (params?: CategoryParams) => {
   return useQuery<CategoryResponse>({
@@ -10,7 +14,7 @@ export const useAllCategories = (params?: CategoryParams) => {
 };
 
 export const useGetAllRegions = () => {
-  return useQuery({
+  return useQuery<GetRegionsResponse>({
     queryKey: ["all-regions"],
     queryFn: () => getAllRegions(),
   });

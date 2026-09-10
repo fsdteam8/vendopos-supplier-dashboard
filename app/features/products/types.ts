@@ -42,10 +42,14 @@ export interface ProductSEO {
   metaDescription: string;
 }
 
+export interface ProductCategoryReference {
+  _id: string;
+}
+
 export interface Product {
   _id: string;
   userId: string;
-  categoryId: string | null; // Updated: API returns null, not Category object
+  categoryId: string | ProductCategoryReference | null;
   supplierId: string;
   title: string;
   slug: string;

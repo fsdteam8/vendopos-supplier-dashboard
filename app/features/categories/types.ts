@@ -1,13 +1,28 @@
-export interface Category {
-  categories: any;
-  _id: string;
-  region: string;
-  slug: string;
+export interface ProductCategory {
   productType: string;
   productName: string[];
+}
+
+export interface Category {
+  categories: ProductCategory[];
+  _id: string;
+  region: string;
+  slug?: string;
   country: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CategoryRegion {
+  _id: string;
+  region: string;
+}
+
+export interface GetRegionsResponse {
+  success: boolean;
+  message: string;
+  statusCode: number;
+  data: CategoryRegion[];
 }
 
 export interface GetCategoriesResponse {

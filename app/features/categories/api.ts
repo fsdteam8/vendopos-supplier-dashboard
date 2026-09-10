@@ -1,5 +1,9 @@
 import api from "@/lib/api/api";
-import { CategoryParams, GetCategoriesResponse } from "./types";
+import {
+  CategoryParams,
+  GetCategoriesResponse,
+  GetRegionsResponse,
+} from "./types";
 
 export const getAllCategories = async (
   params?: CategoryParams,
@@ -10,9 +14,9 @@ export const getAllCategories = async (
   return response.data;
 };
 
-export const getAllRegions = async () => {
+export const getAllRegions = async (): Promise<GetRegionsResponse> => {
   try {
-    const response = await api.get("category/get-region");
+    const response = await api.get<GetRegionsResponse>("category/get-region");
     return response.data;
   } catch (error) {
     console.error("Error fetching regions:", error);
